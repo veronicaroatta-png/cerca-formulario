@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Formularios CERCA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   :root {
     --bg: #f5f2ee;
@@ -413,6 +414,48 @@
   }
   .success-offline.show { display: block; }
 
+  /* ── PDF / EMAIL BUTTON ── */
+  .pdf-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .pdf-section p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .btn-pdf {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-pdf:active { background: var(--primary-light); }
+
+  /* ── SECTION INTRO ── */
+  .section-intro {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.65;
+    background: var(--primary-light);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
   /* ── ERROR / TOAST ── */
   .toast {
     position: fixed;
@@ -539,6 +582,7 @@
 <div class="screen" id="screen2">
   <div class="card">
     <div class="section-title">ESAS-r</div>
+    <div class="section-intro">El siguiente cuestionario tiene como finalidad evaluar los síntomas de nuestros pacientes para lograr un seguimiento detallado e intervenciones efectivas por parte de su equipo de profesionales de la salud. Repetiremos el cuestionario en cada visita al CERCA.</div>
     <div class="section-subtitle">Marque el número que describe mejor cómo se siente <strong>AHORA</strong>, en este momento.</div>
     <div id="esasItems"></div>
   </div>
@@ -554,6 +598,7 @@
 <div class="screen" id="screen3">
   <div class="card">
     <div class="section-title">Adherencia a la medicación</div>
+    <div class="section-intro">Estimado/a paciente, el siguiente cuestionario permite determinar el grado de "adherencia" a la medicación en una escala conocida como Escala de adherencia a la medicación de Morisky-8 (MMAS-8). Le pedimos que se tome un momento para responder las preguntas con el mayor grado de precisión posible. No existen respuestas incorrectas.<br><br>Se le pedirá que rellene el formulario en varias visitas. Esta herramienta será utilizada para que su equipo de salud pueda mejorar su seguimiento y tratamiento.</div>
     <div class="section-subtitle">Responda con la mayor precisión posible. No hay respuestas incorrectas.</div>
     <div id="mmasItems"></div>
   </div>
@@ -574,6 +619,10 @@
     <div class="success-offline" id="successOffline">
       ⚠️ No hay conexión en este momento.<br>Sus respuestas están guardadas en el dispositivo y se enviarán automáticamente cuando vuelva la señal.
     </div>
+    <div class="pdf-section" id="pdfSection" style="display:none">
+      <p id="emailStatus">📧 Enviando resumen al equipo médico…</p>
+      <button class="btn-pdf" id="btnPdf" onclick="downloadSummary()" style="display:none">📄 Descargar resumen en PDF</button>
+    </div>
   </div>
 </div>
 
@@ -591,6 +640,13 @@
 const AIRTABLE_TOKEN   = "patXiXhXMs5w2cduo.96af99c920514074c0dd8b514a0b4640e1abc092f03055973866aaac7f34b283";
 const AIRTABLE_BASE_ID = "appkijBycPPkgo8pU";
 const AIRTABLE_TABLE   = "Respuestas";               // nombre de la tabla
+
+// ── EMAILJS (completar con tus credenciales de emailjs.com) ──────────────
+const EMAILJS_PUBLIC_KEY  = "JOu8hD_uLWcVWd00s";
+const EMAILJS_SERVICE_ID  = "service_6sf09b9";
+const EMAILJS_TEMPLATE_ID = "template_zhy3a0k";
+const EMAIL_DESTINO       = "nefrologia.hospital.aleman@gmail.com";
+// ─────────────────────────────────────────────────────────────────────────
 
 // ▲▲▲  FIN DE CONFIGURACIÓN  ▲▲▲
 // ═══════════════════════════════════════════════════════
@@ -708,6 +764,8 @@ const state = {
   mmas: {},
   mmasFreq: null,
 };
+
+let lastSubmittedFields = null; // para generar el PDF después del envío
 
 // ─── BUILD ESAS ─────────────────────────────────────────
 
@@ -885,6 +943,9 @@ async function submitAll() {
     "MMAS_Score":        mmasTotal,
   };
 
+  // Guardar referencia para PDF
+  lastSubmittedFields = { fields, fecha, hora, mmasTotal };
+
   // Guardar en cola local como respaldo
   addToQueue(fields);
 
@@ -921,7 +982,213 @@ async function submitAll() {
     document.getElementById("successTitle").textContent = "Respuestas guardadas";
   }
 
+  // Mostrar sección PDF y enviar email automático
+  const pdfSection   = document.getElementById("pdfSection");
+  const emailStatus  = document.getElementById("emailStatus");
+  const btnPdf       = document.getElementById("btnPdf");
+  pdfSection.style.display = "block";
+
+  // Intentar envío automático de email
+  try {
+    await sendEmailReport(fields, fecha, hora, mmasTotal);
+    emailStatus.textContent = "✅ Resumen enviado automáticamente al equipo médico.";
+    emailStatus.style.color = "#2e9e6e";
+  } catch(err) {
+    console.warn("No se pudo enviar el email:", err);
+    emailStatus.textContent = "⚠️ No se pudo enviar el email automáticamente.";
+    emailStatus.style.color = "#e65100";
+  }
+  btnPdf.style.display = "block";
+
   updatePendingBanner();
+}
+
+// ─── EMAILJS INIT ────────────────────────────────────────
+
+(function() {
+  try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) {}
+})();
+
+// ─── ENVÍO AUTOMÁTICO DE EMAIL ───────────────────────────
+
+async function sendEmailReport(fields, fecha, hora, mmasTotal) {
+  const esasKeys = [
+    ["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio / fatiga"],
+    ["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],
+    ["ESAS_Apetito","Falta de apetito"],["ESAS_Respiracion","Dificultad para respirar"],
+    ["ESAS_Animo","Ánimo deprimido"],["ESAS_Ansiedad","Ansiedad"],
+    ["ESAS_Sueno","Problemas para dormir"],["ESAS_Bienestar","Bienestar general"],
+  ];
+  if (fields["ESAS_Otro_Nombre"]) esasKeys.push(["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"]]);
+
+  const mmasLabels = [
+    ["MMAS_Q1","¿Se olvida de tomar la medicación?"],
+    ["MMAS_Q2","¿Algún día no tomó la medicación?"],
+    ["MMAS_Q3","¿Suspendió o redujo la dosis sin avisar?"],
+    ["MMAS_Q4","¿Se olvida al viajar?"],
+    ["MMAS_Q5","¿Recibió la última dosis?"],
+    ["MMAS_Q6","¿Deja de tomar cuando cree que está controlado?"],
+    ["MMAS_Q7","¿Se siente fastidiado por las indicaciones?"],
+  ];
+
+  const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
+  const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
+
+  const esasRows = esasKeys.map(([k, lbl]) =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#1a5c4a">
+       ${fields[k] !== undefined && fields[k] !== null ? fields[k] : "—"}
+     </td></tr>`
+  ).join("");
+
+  const mmasRows = mmasLabels.map(([k, lbl]) =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#1a5c4a">
+       ${fields[k] ? fields[k].toUpperCase() : "—"}
+     </td></tr>`
+  ).join("");
+
+  const htmlBody = `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#222">
+  <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0">
+    <h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1>
+    <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">Completado digitalmente el ${fecha} a las ${hora}</p>
+  </div>
+  <div style="background:#f5f5f5;padding:16px 24px;border-bottom:3px solid #e8f5f0">
+    <span style="font-size:13px;color:#666">DNI del paciente: </span>
+    <strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong>
+  </div>
+  <div style="padding:20px 24px">
+    <h2 style="color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px">ESAS-r — Evaluación de Síntomas</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+      <thead><tr>
+        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th>
+        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;width:80px;text-align:center">Valor (0–10)</th>
+      </tr></thead>
+      <tbody>${esasRows}</tbody>
+    </table>
+
+    <h2 style="color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px">MMAS-8 — Adherencia a la Medicación</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+      <thead><tr>
+        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th>
+        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;width:60px;text-align:center">Resp.</th>
+      </tr></thead>
+      <tbody>${mmasRows}</tbody>
+    </table>
+
+    <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:20px">
+      <div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div>
+      <div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div>
+      <div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (escala 0–8)</div>
+    </div>
+  </div>
+  <div style="background:#f5f5f5;padding:12px 24px;border-radius:0 0 8px 8px;text-align:center">
+    <p style="font-size:11px;color:#999;margin:0">Enviado automáticamente desde el formulario digital del Centro CERCA</p>
+  </div>
+</div>`;
+
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email:    EMAIL_DESTINO,
+    subject:     `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`,
+    message_html: htmlBody,
+    dni:         fields.DNI,
+    fecha:       fecha,
+    hora:        hora,
+    score_mmas:  mmasTotal,
+    nivel_mmas:  scoreLabel,
+  });
+}
+
+// ─── PDF DESCARGA ─────────────────────────────────────────
+
+function downloadSummary() {
+  if (!lastSubmittedFields) { showToast("No hay datos para exportar"); return; }
+  const { fields, fecha, hora, mmasTotal } = lastSubmittedFields;
+
+  // Construir contenido HTML para impresión como PDF
+  const esasLabels = {
+    dolor: "Dolor", cansancio: "Cansancio/fatiga", somnolencia: "Somnolencia",
+    nauseas: "Náuseas", apetito: "Falta de apetito", respiracion: "Dificultad para respirar",
+    animo: "Ánimo deprimido", ansiedad: "Ansiedad", sueno: "Problemas para dormir",
+    bienestar: "Bienestar general", otro: fields["ESAS_Otro_Nombre"] || "Otro síntoma"
+  };
+  const mmasLabels = {
+    q1: "¿Se olvida de tomar la medicación?",
+    q2: "¿Algún día no tomó la medicación?",
+    q3: "¿Suspendió o redujo la dosis sin avisar?",
+    q4: "¿Se olvida al viajar?",
+    q5: "¿Recibió la última dosis?",
+    q6: "¿Deja de tomar cuando cree que está controlado?",
+    q7: "¿Se siente fastidiado por las indicaciones?"
+  };
+
+  const esasKeys2 = ["ESAS_Dolor","ESAS_Cansancio","ESAS_Somnolencia","ESAS_Nauseas","ESAS_Apetito","ESAS_Respiracion","ESAS_Animo","ESAS_Ansiedad","ESAS_Sueno","ESAS_Bienestar","ESAS_Otro_Valor"];
+  const esasLabelsList = ["Dolor","Cansancio / fatiga","Somnolencia","Náuseas","Falta de apetito","Dificultad para respirar","Ánimo deprimido","Ansiedad","Problemas para dormir","Bienestar general", fields["ESAS_Otro_Nombre"] || "Otro síntoma"];
+  const esasRows = esasKeys2.map((k,i) => {
+    const val = fields[k];
+    return `<tr><td>${esasLabelsList[i]}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${val !== undefined && val !== null ? val : "—"}</td></tr>`;
+  }).join("");
+
+  const mmasKeysMap = [["MMAS_Q1","¿Se olvida de tomar la medicación?"],["MMAS_Q2","¿Algún día no tomó la medicación?"],["MMAS_Q3","¿Suspendió o redujo la dosis sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Recibió la última dosis?"],["MMAS_Q6","¿Deja de tomar cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado por las indicaciones?"]];
+  const mmasRows = mmasKeysMap.map(([k,lbl]) =>
+    `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`
+  ).join("");
+
+  const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
+  const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Formulario CERCA - ${fields.DNI}</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}
+    h1{color:#1a5c4a;margin-bottom:4px;font-size:22px}
+    .subtitle{color:#888;font-size:13px;margin-bottom:24px}
+    h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:28px}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+    th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}
+    td{padding:7px 12px;border-bottom:1px solid #eee}
+    tr:nth-child(even) td{background:#f9f9f9}
+    .score-box{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}
+    .score-num{font-size:36px;font-weight:bold;color:${scoreColor}}
+    .score-lbl{font-size:13px;color:${scoreColor};font-weight:600}
+    .info-row{display:flex;gap:24px;margin-bottom:24px}
+    .info-item{background:#e8f5f0;border-radius:8px;padding:12px 18px}
+    .info-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em}
+    .info-val{font-size:18px;font-weight:700;color:#1a5c4a}
+    @media print{body{padding:15px}}
+  </style></head><body>
+  <h1>Centro CERCA — Formulario de Evaluación</h1>
+  <div class="subtitle">Formulario completado digitalmente · ${fecha} · ${hora}</div>
+  <div class="info-row">
+    <div class="info-item"><div class="info-label">DNI</div><div class="info-val">${fields.DNI}</div></div>
+    <div class="info-item"><div class="info-label">Fecha</div><div class="info-val">${fecha}</div></div>
+    <div class="info-item"><div class="info-label">Hora</div><div class="info-val">${hora}</div></div>
+  </div>
+  <h2>ESAS-r — Evaluación de Síntomas</h2>
+  <table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead>
+  <tbody>${esasRows}</tbody></table>
+  <h2>MMAS-8 — Adherencia a la Medicación</h2>
+  <table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead>
+  <tbody>${mmasRows}</tbody></table>
+  <div class="score-box">
+    <div class="score-num">${mmasTotal}</div>
+    <div class="score-lbl">${scoreLabel}</div>
+    <div style="font-size:12px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div>
+  </div>
+  </body></html>`;
+
+  // Descargar como HTML que se puede imprimir/guardar como PDF
+  const blob = new Blob([html], { type: "text/html" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url;
+  a.download = `CERCA_${fields.DNI}_${fecha.replace(/\//g,"-")}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("✓ Resumen descargado — revisá tu carpeta de descargas");
 }
 
 // ─── UTILS ──────────────────────────────────────────────
