@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Formularios CERCA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   :root {
     --bg: #f5f2ee;
@@ -19,527 +16,123 @@
     --shadow: 0 2px 20px rgba(26,92,74,0.08);
     --radius: 16px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+  .header { background: var(--primary); padding: 28px 24px 24px; text-align: center; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05); top: -60px; right: -40px; }
+  .header::after  { content: ''; position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.04); bottom: -30px; left: 20px; }
+  .header-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 500; margin-bottom: 6px; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff; line-height: 1.1; }
+  .header p { margin-top: 8px; font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
 
-  /* ── HEADER ── */
-  .header {
-    background: var(--primary);
-    padding: 28px 24px 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-    top: -60px; right: -40px;
-  }
-  .header::after {
-    content: '';
-    position: absolute;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.04);
-    bottom: -30px; left: 20px;
-  }
-  .header-label {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.6);
-    font-weight: 500;
-    margin-bottom: 6px;
-  }
-  .header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: #fff;
-    line-height: 1.1;
-  }
-  .header p {
-    margin-top: 8px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-    line-height: 1.5;
-  }
-
-  /* ── OFFLINE BANNER ── */
-  .offline-banner {
-    display: none;
-    background: #ff9800;
-    color: #fff;
-    text-align: center;
-    padding: 8px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
+  .offline-banner { display: none; background: #ff9800; color: #fff; text-align: center; padding: 8px 16px; font-size: 12px; font-weight: 600; }
   .offline-banner.show { display: block; }
-
-  /* ── PENDING BANNER ── */
-  .pending-banner {
-    display: none;
-    background: #e8f5f0;
-    color: var(--primary);
-    text-align: center;
-    padding: 8px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
+  .pending-banner { display: none; background: #e8f5f0; color: var(--primary); text-align: center; padding: 8px 16px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border); cursor: pointer; }
   .pending-banner.show { display: block; }
 
-  /* ── STEPS BAR ── */
-  .steps-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 18px 24px;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-  }
-  .step-dot {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600;
-    background: var(--border);
-    color: var(--text-muted);
-    transition: all 0.3s;
-    flex-shrink: 0;
-  }
+  .steps-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: var(--border); color: var(--text-muted); transition: all 0.3s; flex-shrink: 0; }
   .step-dot.active { background: var(--primary); color: #fff; }
-  .step-dot.done { background: var(--primary-light); color: var(--primary); }
-  .step-line {
-    height: 2px; flex: 1; background: var(--border);
-    max-width: 40px;
-    transition: background 0.3s;
-  }
+  .step-dot.done   { background: var(--primary-light); color: var(--primary); }
+  .step-line { height: 2px; flex: 1; background: var(--border); max-width: 40px; transition: background 0.3s; }
   .step-line.done { background: var(--primary); }
-  .steps-labels {
-    display: flex;
-    justify-content: space-around;
-    padding: 0 20px 10px;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-  }
-  .steps-labels span {
-    font-size: 10px;
-    color: var(--text-muted);
-    text-align: center;
-    width: 60px;
-  }
+  .steps-labels { display: flex; justify-content: space-around; padding: 0 20px 10px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .steps-labels span { font-size: 10px; color: var(--text-muted); text-align: center; width: 60px; }
   .steps-labels span.active { color: var(--primary); font-weight: 600; }
 
-  /* ── SCREENS ── */
   .screen { display: none; padding: 24px; }
   .screen.active { display: block; }
 
-  /* ── CARD ── */
-  .card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--shadow);
-    margin-bottom: 16px;
-  }
+  .card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--primary); margin-bottom: 6px; }
+  .section-subtitle { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+  .section-intro { font-size: 14px; color: var(--text); line-height: 1.65; background: var(--primary-light); border-left: 3px solid var(--primary); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 20px; }
 
-  .section-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    color: var(--primary);
-    margin-bottom: 6px;
-  }
-  .section-subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 20px;
-  }
-
-  /* ── DNI INPUT ── */
-  .field-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    display: block;
-  }
-  .text-input {
-    width: 100%;
-    padding: 16px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 20px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    color: var(--text);
-    background: var(--bg);
-    letter-spacing: 0.08em;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-  .text-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: #fff;
-  }
+  .field-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; display: block; }
+  .text-input { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 20px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: var(--text); background: var(--bg); letter-spacing: 0.08em; transition: border-color 0.2s; -webkit-appearance: none; }
+  .text-input:focus { outline: none; border-color: var(--primary); background: #fff; }
   .text-input::placeholder { color: var(--border); }
 
-  /* ── ESAS SCALE ── */
-  .esas-item {
-    margin-bottom: 28px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-  }
+  .esas-item { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
   .esas-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-
-  .esas-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .esas-label-left {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--primary);
-    max-width: 45%;
-    line-height: 1.3;
-  }
-  .esas-label-right {
-    font-size: 11px;
-    color: var(--text-muted);
-    max-width: 45%;
-    text-align: right;
-    line-height: 1.3;
-  }
-
-  .esas-scale {
-    display: flex;
-    gap: 4px;
-    justify-content: space-between;
-  }
-  .esas-btn {
-    flex: 1;
-    height: 42px;
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    background: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
+  .esas-labels { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .esas-label-left { font-size: 13px; font-weight: 600; color: var(--primary); max-width: 45%; line-height: 1.3; }
+  .esas-label-right { font-size: 11px; color: var(--text-muted); max-width: 45%; text-align: right; line-height: 1.3; }
+  .esas-scale { display: flex; gap: 4px; justify-content: space-between; }
+  .esas-btn { flex: 1; height: 42px; border: 2px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   .esas-btn:active { transform: scale(0.93); }
-  .esas-btn.selected {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-  }
-  .esas-btn[data-val="0"].selected,
-  .esas-btn[data-val="1"].selected,
-  .esas-btn[data-val="2"].selected { background: #2e9e6e; border-color: #2e9e6e; }
-  .esas-btn[data-val="3"].selected,
-  .esas-btn[data-val="4"].selected { background: #8bc34a; border-color: #8bc34a; color: #333; }
+  .esas-btn[data-val="0"].selected, .esas-btn[data-val="1"].selected, .esas-btn[data-val="2"].selected { background: #2e9e6e; border-color: #2e9e6e; color: #fff; }
+  .esas-btn[data-val="3"].selected, .esas-btn[data-val="4"].selected { background: #8bc34a; border-color: #8bc34a; color: #333; }
   .esas-btn[data-val="5"].selected { background: #ffc107; border-color: #ffc107; color: #333; }
-  .esas-btn[data-val="6"].selected,
-  .esas-btn[data-val="7"].selected { background: #ff9800; border-color: #ff9800; color: #fff; }
-  .esas-btn[data-val="8"].selected,
-  .esas-btn[data-val="9"].selected,
-  .esas-btn[data-val="10"].selected { background: #e53935; border-color: #e53935; color: #fff; }
-
-  .esas-selected-val {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 6px;
-    min-height: 16px;
-  }
-
-  /* ── ESAS OTRO ── */
+  .esas-btn[data-val="6"].selected, .esas-btn[data-val="7"].selected { background: #ff9800; border-color: #ff9800; color: #fff; }
+  .esas-btn[data-val="8"].selected, .esas-btn[data-val="9"].selected, .esas-btn[data-val="10"].selected { background: #e53935; border-color: #e53935; color: #fff; }
+  .esas-selected-val { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 6px; min-height: 16px; }
   .otro-field { margin-top: 10px; }
-  .otro-input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin-bottom: 8px;
-  }
+  .otro-input { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin-bottom: 8px; }
   .otro-input:focus { outline: none; border-color: var(--primary); background: #fff; }
 
-  /* ── MMAS ── */
-  .mmas-item {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
+  .mmas-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
   .mmas-item:last-child { border-bottom: none; }
-
-  .mmas-question {
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-  .mmas-question em {
-    font-style: normal;
-    font-size: 12px;
-    color: var(--text-muted);
-    display: block;
-    margin-top: 4px;
-  }
-
+  .mmas-question { font-size: 14px; line-height: 1.5; color: var(--text); margin-bottom: 12px; }
+  .mmas-question em { font-style: normal; font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
   .mmas-options { display: flex; gap: 10px; }
-  .mmas-btn {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .mmas-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
   .mmas-btn:active { transform: scale(0.95); }
   .mmas-btn.si.selected { background: #e53935; border-color: #e53935; color: #fff; }
   .mmas-btn.no.selected { background: #2e9e6e; border-color: #2e9e6e; color: #fff; }
-
   .freq-options { display: flex; flex-direction: column; gap: 8px; }
-  .freq-btn {
-    padding: 12px 16px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    font-family: 'DM Sans', sans-serif;
-  }
+  .freq-btn { padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; background: #fff; font-size: 14px; cursor: pointer; text-align: left; transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-family: 'DM Sans', sans-serif; }
   .freq-btn:active { transform: scale(0.98); }
   .freq-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-  /* ── NAVIGATION ── */
-  .nav-area {
-    padding: 0 24px 32px;
-    display: flex;
-    gap: 12px;
-  }
-  .btn-back {
-    padding: 16px 24px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .btn-next {
-    flex: 1;
-    padding: 16px;
-    border: none;
-    border-radius: 12px;
-    background: var(--primary);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: opacity 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .nav-area { padding: 0 24px 32px; display: flex; gap: 12px; }
+  .btn-back { padding: 16px 24px; border: 2px solid var(--border); border-radius: 12px; background: transparent; font-size: 15px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-next { flex: 1; padding: 16px; border: none; border-radius: 12px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; -webkit-tap-highlight-color: transparent; }
   .btn-next:active { opacity: 0.85; }
-  .btn-next:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
-  /* ── SUCCESS ── */
-  .success-screen {
-    text-align: center;
-    padding: 48px 24px;
-  }
-  .success-icon {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: var(--primary-light);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 24px;
-    font-size: 36px;
-  }
-  .success-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--primary);
-    margin-bottom: 12px;
-  }
-  .success-text {
-    font-size: 15px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-  .success-offline {
-    display: none;
-    margin-top: 16px;
-    background: #fff3e0;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 13px;
-    color: #e65100;
-    line-height: 1.5;
-  }
+  .success-screen { text-align: center; padding: 48px 24px; }
+  .success-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
+  .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--primary); margin-bottom: 12px; }
+  .success-text { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+  .success-offline { display: none; margin-top: 16px; background: #fff3e0; border-radius: 12px; padding: 16px; font-size: 13px; color: #e65100; line-height: 1.5; }
   .success-offline.show { display: block; }
-
-  /* ── PDF / EMAIL BUTTON ── */
-  .pdf-section {
-    margin-top: 28px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-  .pdf-section p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
-  .btn-pdf {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    border: 2px solid var(--primary);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--primary);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-    margin-bottom: 10px;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .pdf-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .pdf-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+  .btn-pdf { display: block; width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 12px; background: transparent; color: var(--primary); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; margin-bottom: 10px; -webkit-tap-highlight-color: transparent; }
   .btn-pdf:active { background: var(--primary-light); }
 
-  /* ── SECTION INTRO ── */
-  .section-intro {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.65;
-    background: var(--primary-light);
-    border-left: 3px solid var(--primary);
-    border-radius: 0 10px 10px 0;
-    padding: 14px 16px;
-    margin-bottom: 20px;
-  }
-
-  /* ── ERROR / TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #1c1c1c;
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 100px;
-    font-size: 13px;
-    z-index: 999;
-    transition: transform 0.3s;
-    white-space: nowrap;
-    max-width: 90vw;
-    text-align: center;
-  }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1c1c1c; color: #fff; padding: 12px 20px; border-radius: 100px; font-size: 13px; z-index: 999; transition: transform 0.3s; white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* ── LOADING ── */
-  .loading-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(245,242,238,0.9);
-    z-index: 999;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-  }
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(245,242,238,0.9); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
   .loading-overlay.show { display: flex; }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-size: 14px; color: var(--text-muted); }
 
-  /* ── PROGRESS ── */
-  .progress-bar {
-    height: 3px;
-    background: var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    transition: width 0.4s ease;
-  }
+  .progress-bar { height: 3px; background: var(--border); position: relative; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.4s ease; }
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loadingText">Enviando datos…</div>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
-
-<!-- Offline banner -->
 <div class="offline-banner" id="offlineBanner">📵 Sin conexión — los datos se guardarán y enviarán cuando vuelva la señal</div>
-
-<!-- Pending submissions banner -->
 <div class="pending-banner" id="pendingBanner" onclick="flushQueue()"></div>
 
-<!-- Header -->
 <div class="header">
   <div class="header-label">Centro CERCA</div>
   <h1>Evaluación<br>del paciente</h1>
   <p>Complete los formularios con calma.<br>Sus respuestas son confidenciales.</p>
 </div>
 
-<!-- Progress -->
-<div class="progress-bar">
-  <div class="progress-fill" id="progressFill" style="width:0%"></div>
-</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
-<!-- Steps -->
 <div class="steps-bar">
   <div class="step-dot active" id="dot1">1</div>
   <div class="step-line" id="line1"></div>
@@ -553,32 +146,20 @@
   <span id="lbl3">Medicación</span>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 1: DNI
-═══════════════════════════════════════ -->
+<!-- SCREEN 1: DNI -->
 <div class="screen active" id="screen1">
   <div class="card">
     <div class="section-title">Bienvenido/a</div>
     <div class="section-subtitle">Para comenzar, ingrese su número de DNI. No se guardará su nombre.</div>
     <label class="field-label" for="dniInput">Número de DNI</label>
-    <input
-      type="number"
-      inputmode="numeric"
-      pattern="[0-9]*"
-      id="dniInput"
-      class="text-input"
-      placeholder="Ej: 30123456"
-      maxlength="9"
-    >
+    <input type="number" inputmode="numeric" pattern="[0-9]*" id="dniInput" class="text-input" placeholder="Ej: 30123456" maxlength="9">
   </div>
 </div>
 <div class="nav-area" id="nav1">
-  <button class="btn-next" id="btnNext1" onclick="goToESAS()">Comenzar →</button>
+  <button class="btn-next" onclick="goToESAS()">Comenzar →</button>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 2: ESAS-r
-═══════════════════════════════════════ -->
+<!-- SCREEN 2: ESAS-r -->
 <div class="screen" id="screen2">
   <div class="card">
     <div class="section-title">ESAS-r</div>
@@ -592,9 +173,7 @@
   <button class="btn-next" onclick="goToMMAS()">Continuar →</button>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 3: MMAS-8
-═══════════════════════════════════════ -->
+<!-- SCREEN 3: MMAS-8 -->
 <div class="screen" id="screen3">
   <div class="card">
     <div class="section-title">Adherencia a la medicación</div>
@@ -608,62 +187,37 @@
   <button class="btn-next" onclick="submitAll()">Enviar ✓</button>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 4: SUCCESS
-═══════════════════════════════════════ -->
+<!-- SCREEN 4: SUCCESS -->
 <div class="screen" id="screen4">
   <div class="success-screen">
     <div class="success-icon" id="successIcon">✓</div>
     <div class="success-title" id="successTitle">¡Muchas gracias!</div>
     <div class="success-text" id="successText">Sus respuestas fueron registradas correctamente.<br><br>Puede cerrar esta pantalla o entregársela al profesional de salud.</div>
-    <div class="success-offline" id="successOffline">
-      ⚠️ No hay conexión en este momento.<br>Sus respuestas están guardadas en el dispositivo y se enviarán automáticamente cuando vuelva la señal.
-    </div>
+    <div class="success-offline" id="successOffline">⚠️ No hay conexión en este momento.<br>Sus respuestas están guardadas en el dispositivo y se enviarán automáticamente cuando vuelva la señal.</div>
     <div class="pdf-section" id="pdfSection" style="display:none">
-      <p id="emailStatus">📧 Enviando resumen al equipo médico…</p>
-      <button class="btn-pdf" id="btnPdf" onclick="downloadSummary()" style="display:none">📄 Descargar resumen en PDF</button>
+      <p id="emailStatus"></p>
+      <button class="btn-pdf" id="btnPdf" onclick="downloadSummary()" style="display:none">📄 Descargar resumen</button>
     </div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════
-// ▼▼▼  CONFIGURACIÓN — COMPLETAR ANTES DE PUBLICAR  ▼▼▼
+// WORKER URL — aquí apuntamos al Worker de Cloudflare
+// La API Key de Airtable está guardada allá, no acá
 // ═══════════════════════════════════════════════════════
+const WORKER_URL = "https://cerca.veronicaroatta.workers.dev";
 
-// 1. En Airtable, creá una base con una tabla llamada "Respuestas"
-//    y las columnas listadas al final de este archivo.
-// 2. Generá un Personal Access Token en https://airtable.com/create/tokens
-//    con el scope "data:records:write" para tu base.
-// 3. Copiá el Base ID desde la URL de tu base (empieza con "app...").
-
-const AIRTABLE_TOKEN   = "patXiXhXMs5w2cduo.96af99c920514074c0dd8b514a0b4640e1abc092f03055973866aaac7f34b283";
-const AIRTABLE_BASE_ID = "appkijBycPPkgo8pU";
-const AIRTABLE_TABLE   = "Respuestas";               // nombre de la tabla
-
-// ── EMAILJS (completar con tus credenciales de emailjs.com) ──────────────
+// ── EMAILJS (opcional — completar si querés email automático) ──
 const EMAILJS_PUBLIC_KEY  = "JOu8hD_uLWcVWd00s";
 const EMAILJS_SERVICE_ID  = "service_6sf09b9";
 const EMAILJS_TEMPLATE_ID = "template_r6tjscb";
 const EMAIL_DESTINO       = "nefrologia.hospital.aleman@gmail.com";
-// ─────────────────────────────────────────────────────────────────────────
-
-// ▲▲▲  FIN DE CONFIGURACIÓN  ▲▲▲
-// ═══════════════════════════════════════════════════════
 
 // ─── COLA OFFLINE ───────────────────────────────────────
-// Las respuestas se guardan en el dispositivo si no hay internet
-// y se reenvían automáticamente cuando hay señal.
 const QUEUE_KEY = "cerca_submit_queue";
-
-function getQueue() {
-  try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); }
-  catch { return []; }
-}
-function saveQueue(q) {
-  try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
-  catch(e) { console.warn("No se pudo guardar en localStorage:", e); }
-}
+function getQueue() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); } catch { return []; } }
+function saveQueue(q) { try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch(e) {} }
 function addToQueue(payload) {
   const q = getQueue();
   q.push({ payload, timestamp: new Date().toISOString(), attempts: 0 });
@@ -681,60 +235,46 @@ function updatePendingBanner() {
   }
 }
 
-async function submitToAirtable(fields) {
-  const res = await fetch(
-    `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ fields })
-    }
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
-  }
+// ─── ENVÍO AL WORKER ────────────────────────────────────
+async function submitToWorker(fields) {
+  const res = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields)
+  });
+  if (!res.ok) throw new Error("Error " + res.status);
   return res.json();
 }
 
 async function flushQueue() {
   const q = getQueue();
   if (q.length === 0) return;
-
   const remaining = [];
   for (const item of q) {
-    try {
-      await submitToAirtable(item.payload);
-    } catch(e) {
-      item.attempts = (item.attempts || 0) + 1;
-      remaining.push(item);
-    }
+    try { await submitToWorker(item.payload); }
+    catch(e) { item.attempts = (item.attempts || 0) + 1; remaining.push(item); }
   }
   saveQueue(remaining);
   updatePendingBanner();
   if (remaining.length < q.length) {
     const sent = q.length - remaining.length;
-    showToast(`✓ ${sent} respuesta${sent > 1 ? "s" : ""} enviada${sent > 1 ? "s" : ""} correctamente`);
+    showToast(`✓ ${sent} respuesta${sent > 1 ? "s" : ""} enviada${sent > 1 ? "s" : ""}`);
   }
 }
 
 // ─── DATOS DE LOS FORMULARIOS ───────────────────────────
-
 const esasItems = [
-  { id: "dolor",       left: "Nada de dolor",                   right: "El peor dolor que se pueda imaginar" },
-  { id: "cansancio",   left: "Nada agotado (cansancio)",         right: "Lo más agotado que se pueda imaginar" },
-  { id: "somnolencia", left: "Nada somnoliento (adormilado)",    right: "Lo más somnoliento que se pueda imaginar" },
-  { id: "nauseas",     left: "Sin náuseas",                      right: "Las peores náuseas que se pueda imaginar" },
-  { id: "apetito",     left: "Ninguna pérdida de apetito",       right: "El peor apetito que se pueda imaginar" },
-  { id: "respiracion", left: "Ninguna dificultad para respirar", right: "La mayor dificultad para respirar que se pueda imaginar" },
-  { id: "animo",       left: "Nada desanimado",                  right: "Lo más desanimado que se pueda imaginar" },
-  { id: "ansiedad",    left: "Nada nervioso (ansiedad)",         right: "Lo más nervioso que se pueda imaginar" },
-  { id: "sueno",       left: "Duermo perfectamente",             right: "La mayor dificultad para dormir que se pueda imaginar" },
+  { id: "dolor",       left: "Nada de dolor",                        right: "El peor dolor que se pueda imaginar" },
+  { id: "cansancio",   left: "Nada agotado (cansancio)",              right: "Lo más agotado que se pueda imaginar" },
+  { id: "somnolencia", left: "Nada somnoliento (adormilado)",         right: "Lo más somnoliento que se pueda imaginar" },
+  { id: "nauseas",     left: "Sin náuseas",                           right: "Las peores náuseas que se pueda imaginar" },
+  { id: "apetito",     left: "Ninguna pérdida de apetito",            right: "El peor apetito que se pueda imaginar" },
+  { id: "respiracion", left: "Ninguna dificultad para respirar",      right: "La mayor dificultad para respirar que se pueda imaginar" },
+  { id: "animo",       left: "Nada desanimado",                       right: "Lo más desanimado que se pueda imaginar" },
+  { id: "ansiedad",    left: "Nada nervioso (ansiedad)",              right: "Lo más nervioso que se pueda imaginar" },
+  { id: "sueno",       left: "Duermo perfectamente",                  right: "La mayor dificultad para dormir que se pueda imaginar" },
   { id: "bienestar",   left: "Sintiéndome perfectamente (bienestar)", right: "Sintiéndome lo peor que se pueda imaginar" },
-  { id: "otro",        left: "Otro problema",                    right: "Lo peor posible", isOtro: true },
+  { id: "otro",        left: "Otro problema",                         right: "Lo peor posible", isOtro: true },
 ];
 
 const mmasItems = [
@@ -755,41 +295,21 @@ const mmasFreqOpts = [
   { val: 0,    label: "Siempre" },
 ];
 
-// ─── STATE ──────────────────────────────────────────────
-
-const state = {
-  dni: "",
-  esas: {},
-  esasOtroNombre: "",
-  mmas: {},
-  mmasFreq: null,
-};
-
-let lastSubmittedFields = null; // para generar el PDF después del envío
+const state = { dni: "", esas: {}, esasOtroNombre: "", mmas: {}, mmasFreq: null };
+let lastSubmittedFields = null;
 
 // ─── BUILD ESAS ─────────────────────────────────────────
-
 function buildESAS() {
   const container = document.getElementById("esasItems");
   container.innerHTML = "";
   esasItems.forEach(item => {
     const div = document.createElement("div");
     div.className = "esas-item";
-    let html = `<div class="esas-labels">
-      <div class="esas-label-left">${item.left}</div>
-      <div class="esas-label-right">${item.right}</div>
-    </div>`;
-    if (item.isOtro) {
-      html += `<div class="otro-field">
-        <input type="text" class="otro-input" id="otroNombre" placeholder="¿Cuál síntoma? (ej: sequedad de boca)" maxlength="50">
-      </div>`;
-    }
+    let html = `<div class="esas-labels"><div class="esas-label-left">${item.left}</div><div class="esas-label-right">${item.right}</div></div>`;
+    if (item.isOtro) html += `<div class="otro-field"><input type="text" class="otro-input" id="otroNombre" placeholder="¿Cuál síntoma? (ej: sequedad de boca)" maxlength="50"></div>`;
     html += `<div class="esas-scale">`;
-    for (let v = 0; v <= 10; v++) {
-      html += `<button class="esas-btn" data-id="${item.id}" data-val="${v}" onclick="selectESAS('${item.id}', ${v}, this)">${v}</button>`;
-    }
-    html += `</div>`;
-    html += `<div class="esas-selected-val" id="esasVal_${item.id}"></div>`;
+    for (let v = 0; v <= 10; v++) html += `<button class="esas-btn" data-id="${item.id}" data-val="${v}" onclick="selectESAS('${item.id}',${v},this)">${v}</button>`;
+    html += `</div><div class="esas-selected-val" id="esasVal_${item.id}"></div>`;
     div.innerHTML = html;
     container.appendChild(div);
   });
@@ -801,44 +321,28 @@ function selectESAS(id, val, btn) {
   state.esas[id] = val;
   const label = document.getElementById(`esasVal_${id}`);
   if (label) label.textContent = val === 0 ? "Sin síntoma" : val <= 3 ? "Leve" : val <= 6 ? "Moderado" : "Severo";
-  checkESASProgress();
-}
-
-function checkESASProgress() {
   const filled = Object.keys(state.esas).length;
-  const pct = Math.round((filled / esasItems.length) * 50) + 33;
-  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressFill").style.width = (Math.round((filled / esasItems.length) * 50) + 33) + "%";
 }
 
 // ─── BUILD MMAS ─────────────────────────────────────────
-
 function buildMMAS() {
   const container = document.getElementById("mmasItems");
   container.innerHTML = "";
   mmasItems.forEach(item => {
     const div = document.createElement("div");
     div.className = "mmas-item";
-    div.innerHTML = `
-      <div class="mmas-question">
-        ${item.q}
-        ${item.note ? `<em>${item.note}</em>` : ""}
-      </div>
+    div.innerHTML = `<div class="mmas-question">${item.q}${item.note ? `<em>${item.note}</em>` : ""}</div>
       <div class="mmas-options">
-        <button class="mmas-btn si" data-id="${item.id}" onclick="selectMMAS('${item.id}', 'si', this)">Sí</button>
-        <button class="mmas-btn no" data-id="${item.id}" onclick="selectMMAS('${item.id}', 'no', this)">No</button>
-      </div>
-    `;
+        <button class="mmas-btn si" data-id="${item.id}" onclick="selectMMAS('${item.id}','si',this)">Sí</button>
+        <button class="mmas-btn no" data-id="${item.id}" onclick="selectMMAS('${item.id}','no',this)">No</button>
+      </div>`;
     container.appendChild(div);
   });
-
   const freqDiv = document.createElement("div");
   freqDiv.className = "mmas-item";
-  freqDiv.innerHTML = `
-    <div class="mmas-question">¿Cuán seguido tiene problemas para recordar tomar <strong>todos</strong> sus medicamentos?</div>
-    <div class="freq-options">
-      ${mmasFreqOpts.map(f => `<button class="freq-btn" data-freq="${f.val}" onclick="selectFreq(${f.val}, this)">${f.label}</button>`).join("")}
-    </div>
-  `;
+  freqDiv.innerHTML = `<div class="mmas-question">¿Cuán seguido tiene problemas para recordar tomar <strong>todos</strong> sus medicamentos?</div>
+    <div class="freq-options">${mmasFreqOpts.map(f => `<button class="freq-btn" data-freq="${f.val}" onclick="selectFreq(${f.val},this)">${f.label}</button>`).join("")}</div>`;
   container.appendChild(freqDiv);
 }
 
@@ -855,13 +359,12 @@ function selectFreq(val, btn) {
 }
 
 // ─── NAVIGATION ─────────────────────────────────────────
-
 function goTo(n) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById("screen" + n).classList.add("active");
-  [1, 2, 3].forEach(i => {
+  [1,2,3].forEach(i => {
     const dot = document.getElementById("dot" + i);
-    dot.classList.remove("active", "done");
+    dot.classList.remove("active","done");
     document.getElementById("lbl" + i).classList.remove("active");
     if (i < n) dot.classList.add("done");
     if (i === n) { dot.classList.add("active"); document.getElementById("lbl" + i).classList.add("active"); }
@@ -893,20 +396,14 @@ function goToMMAS() {
 }
 
 // ─── SUBMIT ─────────────────────────────────────────────
-
 async function submitAll() {
   const missingMmas = mmasItems.filter(item => state.mmas[item.id] === undefined);
   if (missingMmas.length > 0) { showToast(`Complete todas las preguntas (faltan ${missingMmas.length})`); return; }
   if (state.mmasFreq === null) { showToast("Indique la frecuencia de olvidos"); return; }
 
-  // Calcular score MMAS-8
   let mmasScore = 0;
   mmasItems.forEach(item => {
-    if (item.id === "q5") {
-      mmasScore += state.mmas[item.id] === "no" ? 1 : 0;
-    } else {
-      mmasScore += state.mmas[item.id] === "si" ? 1 : 0;
-    }
+    mmasScore += item.id === "q5" ? (state.mmas[item.id] === "no" ? 1 : 0) : (state.mmas[item.id] === "si" ? 1 : 0);
   });
   mmasScore += (1 - state.mmasFreq);
   const mmasTotal = parseFloat((8 - mmasScore).toFixed(2));
@@ -915,61 +412,38 @@ async function submitAll() {
   const fecha = now.toLocaleDateString("es-AR");
   const hora  = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 
-  // Campos para Airtable (deben coincidir con las columnas de tu tabla)
   const fields = {
-    "DNI":               state.dni,
-    "Fecha":             fecha,
-    "Hora":              hora,
-    "ESAS_Dolor":        state.esas.dolor,
-    "ESAS_Cansancio":    state.esas.cansancio,
-    "ESAS_Somnolencia":  state.esas.somnolencia,
-    "ESAS_Nauseas":      state.esas.nauseas,
-    "ESAS_Apetito":      state.esas.apetito,
-    "ESAS_Respiracion":  state.esas.respiracion,
-    "ESAS_Animo":        state.esas.animo,
-    "ESAS_Ansiedad":     state.esas.ansiedad,
-    "ESAS_Sueno":        state.esas.sueno,
-    "ESAS_Bienestar":    state.esas.bienestar,
-    "ESAS_Otro_Nombre":  state.esasOtroNombre,
-    "ESAS_Otro_Valor":   state.esas.otro,
-    "MMAS_Q1":           state.mmas.q1,
-    "MMAS_Q2":           state.mmas.q2,
-    "MMAS_Q3":           state.mmas.q3,
-    "MMAS_Q4":           state.mmas.q4,
-    "MMAS_Q5":           state.mmas.q5,
-    "MMAS_Q6":           state.mmas.q6,
-    "MMAS_Q7":           state.mmas.q7,
-    "MMAS_Frecuencia":   state.mmasFreq,
-    "MMAS_Score":        mmasTotal,
+    "DNI": state.dni, "Fecha": fecha, "Hora": hora,
+    "ESAS_Dolor": state.esas.dolor, "ESAS_Cansancio": state.esas.cansancio,
+    "ESAS_Somnolencia": state.esas.somnolencia, "ESAS_Nauseas": state.esas.nauseas,
+    "ESAS_Apetito": state.esas.apetito, "ESAS_Respiracion": state.esas.respiracion,
+    "ESAS_Animo": state.esas.animo, "ESAS_Ansiedad": state.esas.ansiedad,
+    "ESAS_Sueno": state.esas.sueno, "ESAS_Bienestar": state.esas.bienestar,
+    "ESAS_Otro_Nombre": state.esasOtroNombre, "ESAS_Otro_Valor": state.esas.otro,
+    "MMAS_Q1": state.mmas.q1, "MMAS_Q2": state.mmas.q2, "MMAS_Q3": state.mmas.q3,
+    "MMAS_Q4": state.mmas.q4, "MMAS_Q5": state.mmas.q5, "MMAS_Q6": state.mmas.q6,
+    "MMAS_Q7": state.mmas.q7, "MMAS_Frecuencia": state.mmasFreq, "MMAS_Score": mmasTotal,
   };
 
-  // Guardar referencia para PDF
   lastSubmittedFields = { fields, fecha, hora, mmasTotal };
-
-  // Guardar en cola local como respaldo
   addToQueue(fields);
 
   document.getElementById("loadingOverlay").classList.add("show");
   document.getElementById("loadingText").textContent = "Enviando datos…";
 
   let enviado = false;
-
   try {
-    await submitToAirtable(fields);
-    // Si envió OK, sacar de la cola
+    await submitToWorker(fields);
     const q = getQueue();
-    const qFiltered = q.filter(item => item.payload.DNI !== fields.DNI || item.payload.Fecha !== fields.Fecha || item.payload.Hora !== fields.Hora);
-    saveQueue(qFiltered);
+    saveQueue(q.filter(item => !(item.payload.DNI === fields.DNI && item.payload.Fecha === fields.Fecha && item.payload.Hora === fields.Hora)));
     enviado = true;
   } catch(e) {
-    console.warn("Error enviando a Airtable:", e.message);
-    // Los datos quedan en la cola para reintento automático
+    console.warn("Error al enviar:", e.message);
   }
 
   document.getElementById("loadingOverlay").classList.remove("show");
   document.getElementById("progressFill").style.width = "100%";
 
-  // Mostrar éxito
   ["nav1","nav2","nav3"].forEach(id => document.getElementById(id).style.display = "none");
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById("screen4").classList.add("active");
@@ -982,285 +456,81 @@ async function submitAll() {
     document.getElementById("successTitle").textContent = "Respuestas guardadas";
   }
 
-  // Mostrar sección PDF y enviar email automático
-  const pdfSection   = document.getElementById("pdfSection");
-  const emailStatus  = document.getElementById("emailStatus");
-  const btnPdf       = document.getElementById("btnPdf");
+  const pdfSection  = document.getElementById("pdfSection");
+  const emailStatus = document.getElementById("emailStatus");
+  const btnPdf      = document.getElementById("btnPdf");
   pdfSection.style.display = "block";
 
-  // Intentar envío automático de email
   try {
     await sendEmailReport(fields, fecha, hora, mmasTotal);
-    emailStatus.textContent = "✅ Resumen enviado automáticamente al equipo médico.";
+    emailStatus.textContent = "✅ Resumen enviado al equipo médico.";
     emailStatus.style.color = "#2e9e6e";
   } catch(err) {
-    console.warn("No se pudo enviar el email:", err);
     emailStatus.textContent = "⚠️ No se pudo enviar el email automáticamente.";
     emailStatus.style.color = "#e65100";
   }
   btnPdf.style.display = "block";
-
   updatePendingBanner();
 }
 
-// ─── EMAILJS INIT ────────────────────────────────────────
-
-(function() {
-  try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) {}
-})();
-
-// ─── ENVÍO AUTOMÁTICO DE EMAIL ───────────────────────────
+// ─── EMAILJS ────────────────────────────────────────────
+(function() { try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) {} })();
 
 async function sendEmailReport(fields, fecha, hora, mmasTotal) {
-  const esasKeys = [
-    ["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio / fatiga"],
-    ["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],
-    ["ESAS_Apetito","Falta de apetito"],["ESAS_Respiracion","Dificultad para respirar"],
-    ["ESAS_Animo","Ánimo deprimido"],["ESAS_Ansiedad","Ansiedad"],
-    ["ESAS_Sueno","Problemas para dormir"],["ESAS_Bienestar","Bienestar general"],
-  ];
-  if (fields["ESAS_Otro_Nombre"]) esasKeys.push(["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"]]);
-
-  const mmasLabels = [
-    ["MMAS_Q1","¿Se olvida de tomar la medicación?"],
-    ["MMAS_Q2","¿Algún día no tomó la medicación?"],
-    ["MMAS_Q3","¿Suspendió o redujo la dosis sin avisar?"],
-    ["MMAS_Q4","¿Se olvida al viajar?"],
-    ["MMAS_Q5","¿Recibió la última dosis?"],
-    ["MMAS_Q6","¿Deja de tomar cuando cree que está controlado?"],
-    ["MMAS_Q7","¿Se siente fastidiado por las indicaciones?"],
-  ];
-
   const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
   const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
-
-  const esasRows = esasKeys.map(([k, lbl]) =>
-    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#1a5c4a">
-       ${fields[k] !== undefined && fields[k] !== null ? fields[k] : "—"}
-     </td></tr>`
-  ).join("");
-
-  const mmasRows = mmasLabels.map(([k, lbl]) =>
-    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#1a5c4a">
-       ${fields[k] ? fields[k].toUpperCase() : "—"}
-     </td></tr>`
-  ).join("");
-
-  const htmlBody = `
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#222">
-  <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1>
-    <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">Completado digitalmente el ${fecha} a las ${hora}</p>
-  </div>
-  <div style="background:#f5f5f5;padding:16px 24px;border-bottom:3px solid #e8f5f0">
-    <span style="font-size:13px;color:#666">DNI del paciente: </span>
-    <strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong>
-  </div>
-  <div style="padding:20px 24px">
-    <h2 style="color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px">ESAS-r — Evaluación de Síntomas</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
-      <thead><tr>
-        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th>
-        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;width:80px;text-align:center">Valor (0–10)</th>
-      </tr></thead>
-      <tbody>${esasRows}</tbody>
-    </table>
-
-    <h2 style="color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px">MMAS-8 — Adherencia a la Medicación</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
-      <thead><tr>
-        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th>
-        <th style="background:#1a5c4a;color:#fff;padding:8px 10px;width:60px;text-align:center">Resp.</th>
-      </tr></thead>
-      <tbody>${mmasRows}</tbody>
-    </table>
-
-    <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:20px">
-      <div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div>
-      <div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div>
-      <div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (escala 0–8)</div>
-    </div>
-  </div>
-  <div style="background:#f5f5f5;padding:12px 24px;border-radius:0 0 8px 8px;text-align:center">
-    <p style="font-size:11px;color:#999;margin:0">Enviado automáticamente desde el formulario digital del Centro CERCA</p>
-  </div>
-</div>`;
-
-  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-    to_email:    EMAIL_DESTINO,
-    subject:     `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`,
-    message_html: htmlBody,
-    dni:         fields.DNI,
-    fecha:       fecha,
-    hora:        hora,
-    score_mmas:  mmasTotal,
-    nivel_mmas:  scoreLabel,
-  });
+  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"]];
+  const mmasLabels = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
+  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
+  const mmasRows = mmasLabels.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
+  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+    <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0"><h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1><p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">${fecha} · ${hora}</p></div>
+    <div style="padding:16px 24px;background:#f5f5f5"><span style="font-size:13px;color:#666">DNI: </span><strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong></div>
+    <div style="padding:20px 24px"><h2 style="color:#1a5c4a;font-size:15px">ESAS-r</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Valor</th></tr></thead><tbody>${esasRows}</tbody></table>
+    <h2 style="color:#1a5c4a;font-size:15px;margin-top:20px">MMAS-8</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
+    <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:20px"><div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div><div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div></div></div>`;
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: EMAIL_DESTINO, subject: `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`, message_html: htmlBody, dni: fields.DNI, fecha, hora, score_mmas: mmasTotal, nivel_mmas: scoreLabel });
 }
 
-// ─── PDF DESCARGA ─────────────────────────────────────────
-
+// ─── PDF ────────────────────────────────────────────────
 function downloadSummary() {
   if (!lastSubmittedFields) { showToast("No hay datos para exportar"); return; }
   const { fields, fecha, hora, mmasTotal } = lastSubmittedFields;
-
-  // Construir contenido HTML para impresión como PDF
-  const esasLabels = {
-    dolor: "Dolor", cansancio: "Cansancio/fatiga", somnolencia: "Somnolencia",
-    nauseas: "Náuseas", apetito: "Falta de apetito", respiracion: "Dificultad para respirar",
-    animo: "Ánimo deprimido", ansiedad: "Ansiedad", sueno: "Problemas para dormir",
-    bienestar: "Bienestar general", otro: fields["ESAS_Otro_Nombre"] || "Otro síntoma"
-  };
-  const mmasLabels = {
-    q1: "¿Se olvida de tomar la medicación?",
-    q2: "¿Algún día no tomó la medicación?",
-    q3: "¿Suspendió o redujo la dosis sin avisar?",
-    q4: "¿Se olvida al viajar?",
-    q5: "¿Recibió la última dosis?",
-    q6: "¿Deja de tomar cuando cree que está controlado?",
-    q7: "¿Se siente fastidiado por las indicaciones?"
-  };
-
-  const esasKeys2 = ["ESAS_Dolor","ESAS_Cansancio","ESAS_Somnolencia","ESAS_Nauseas","ESAS_Apetito","ESAS_Respiracion","ESAS_Animo","ESAS_Ansiedad","ESAS_Sueno","ESAS_Bienestar","ESAS_Otro_Valor"];
-  const esasLabelsList = ["Dolor","Cansancio / fatiga","Somnolencia","Náuseas","Falta de apetito","Dificultad para respirar","Ánimo deprimido","Ansiedad","Problemas para dormir","Bienestar general", fields["ESAS_Otro_Nombre"] || "Otro síntoma"];
-  const esasRows = esasKeys2.map((k,i) => {
-    const val = fields[k];
-    return `<tr><td>${esasLabelsList[i]}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${val !== undefined && val !== null ? val : "—"}</td></tr>`;
-  }).join("");
-
-  const mmasKeysMap = [["MMAS_Q1","¿Se olvida de tomar la medicación?"],["MMAS_Q2","¿Algún día no tomó la medicación?"],["MMAS_Q3","¿Suspendió o redujo la dosis sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Recibió la última dosis?"],["MMAS_Q6","¿Deja de tomar cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado por las indicaciones?"]];
-  const mmasRows = mmasKeysMap.map(([k,lbl]) =>
-    `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`
-  ).join("");
-
   const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
   const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Formulario CERCA - ${fields.DNI}</title>
-  <style>
-    body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}
-    h1{color:#1a5c4a;margin-bottom:4px;font-size:22px}
-    .subtitle{color:#888;font-size:13px;margin-bottom:24px}
-    h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:28px}
-    table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
-    th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}
-    td{padding:7px 12px;border-bottom:1px solid #eee}
-    tr:nth-child(even) td{background:#f9f9f9}
-    .score-box{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}
-    .score-num{font-size:36px;font-weight:bold;color:${scoreColor}}
-    .score-lbl{font-size:13px;color:${scoreColor};font-weight:600}
-    .info-row{display:flex;gap:24px;margin-bottom:24px}
-    .info-item{background:#e8f5f0;border-radius:8px;padding:12px 18px}
-    .info-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em}
-    .info-val{font-size:18px;font-weight:700;color:#1a5c4a}
-    @media print{body{padding:15px}}
-  </style></head><body>
-  <h1>Centro CERCA — Formulario de Evaluación</h1>
-  <div class="subtitle">Formulario completado digitalmente · ${fecha} · ${hora}</div>
-  <div class="info-row">
-    <div class="info-item"><div class="info-label">DNI</div><div class="info-val">${fields.DNI}</div></div>
-    <div class="info-item"><div class="info-label">Fecha</div><div class="info-val">${fecha}</div></div>
-    <div class="info-item"><div class="info-label">Hora</div><div class="info-val">${hora}</div></div>
-  </div>
-  <h2>ESAS-r — Evaluación de Síntomas</h2>
-  <table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead>
-  <tbody>${esasRows}</tbody></table>
-  <h2>MMAS-8 — Adherencia a la Medicación</h2>
-  <table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead>
-  <tbody>${mmasRows}</tbody></table>
-  <div class="score-box">
-    <div class="score-num">${mmasTotal}</div>
-    <div class="score-lbl">${scoreLabel}</div>
-    <div style="font-size:12px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div>
-  </div>
-  </body></html>`;
-
-  // Descargar como HTML que se puede imprimir/guardar como PDF
+  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"],["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"] || "Otro síntoma"]];
+  const mmasKeysMap = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
+  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td>${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
+  const mmasRows = mmasKeysMap.map(([k,lbl]) => `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CERCA ${fields.DNI}</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}h1{color:#1a5c4a;font-size:22px}h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}td{padding:7px 12px;border-bottom:1px solid #eee}.score{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}.sn{font-size:36px;font-weight:bold;color:${scoreColor}}.sl{font-size:13px;color:${scoreColor};font-weight:600}</style></head><body>
+    <h1>Centro CERCA — Formulario de Evaluación</h1>
+    <p style="color:#888;font-size:13px">${fecha} · ${hora} · DNI: <strong style="color:#1a5c4a">${fields.DNI}</strong></p>
+    <h2>ESAS-r</h2><table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead><tbody>${esasRows}</tbody></table>
+    <h2>MMAS-8</h2><table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
+    <div class="score"><div class="sn">${mmasTotal}</div><div class="sl">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div>
+    </body></html>`;
   const blob = new Blob([html], { type: "text/html" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href = url;
-  a.download = `CERCA_${fields.DNI}_${fecha.replace(/\//g,"-")}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("✓ Resumen descargado — revisá tu carpeta de descargas");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `CERCA_${fields.DNI}_${fecha.replace(/\//g,"-")}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast("✓ Resumen descargado");
 }
 
 // ─── UTILS ──────────────────────────────────────────────
-
 function showToast(msg) {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
+  t.textContent = msg; t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
-// ─── CONECTIVIDAD ───────────────────────────────────────
-
 function checkOnline() {
   const banner = document.getElementById("offlineBanner");
-  if (!navigator.onLine) {
-    banner.classList.add("show");
-  } else {
-    banner.classList.remove("show");
-    flushQueue(); // intenta enviar pendientes al recuperar señal
-  }
+  if (!navigator.onLine) { banner.classList.add("show"); }
+  else { banner.classList.remove("show"); flushQueue(); }
 }
-
 window.addEventListener("online",  checkOnline);
 window.addEventListener("offline", checkOnline);
-
-// ─── INIT ────────────────────────────────────────────────
-
-window.addEventListener("load", () => {
-  checkOnline();
-  updatePendingBanner();
-  // Intentar enviar cola pendiente al abrir la app
-  if (navigator.onLine) flushQueue();
-});
+window.addEventListener("load", () => { checkOnline(); updatePendingBanner(); if (navigator.onLine) flushQueue(); });
 </script>
-
-<!--
-════════════════════════════════════════════════════════
-  COLUMNAS NECESARIAS EN AIRTABLE (tabla "Respuestas")
-════════════════════════════════════════════════════════
-
-  Nombre de columna     Tipo en Airtable
-  ─────────────────     ────────────────
-  DNI                   Single line text
-  Fecha                 Single line text
-  Hora                  Single line text
-  ESAS_Dolor            Number
-  ESAS_Cansancio        Number
-  ESAS_Somnolencia      Number
-  ESAS_Nauseas          Number
-  ESAS_Apetito          Number
-  ESAS_Respiracion      Number
-  ESAS_Animo            Number
-  ESAS_Ansiedad         Number
-  ESAS_Sueno            Number
-  ESAS_Bienestar        Number
-  ESAS_Otro_Nombre      Single line text
-  ESAS_Otro_Valor       Number
-  MMAS_Q1               Single line text
-  MMAS_Q2               Single line text
-  MMAS_Q3               Single line text
-  MMAS_Q4               Single line text
-  MMAS_Q5               Single line text
-  MMAS_Q6               Single line text
-  MMAS_Q7               Single line text
-  MMAS_Frecuencia       Number
-  MMAS_Score            Number
-
-  ⚠️  Los nombres de columna deben ser EXACTAMENTE estos
-      (mayúsculas y guiones bajos incluidos).
-════════════════════════════════════════════════════════
--->
-</body>
-</html>
-<!-- v2 -->
+</body></html>
