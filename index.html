@@ -1,2057 +1,536 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://nefro-proxy.veronicaroatta.workers.dev; img-src 'self' data:;"><meta http-equiv="Referrer-Policy" content="no-referrer"><title>Registro Nefrológico</title><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><style> @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap'); :root { --ink: #1a1a2e; --paper: #f5f0e8; --accent: #c0392b; --accent2: #2980b9; --muted: #7f8c8d; --border: #d5c9b8; --card: #fffdf8; --success: #27ae60; --shadow: rgba(26,26,46,0.10); } *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; padding: 0 0 60px 0; } header { background: var(--ink); color: white; padding: 32px 48px 24px; display: flex; align-items: flex-end; gap: 24px; border-bottom: 4px solid var(--accent); position: relative; overflow: hidden; } header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; border: 40px solid rgba(192,57,43,0.13); } .header-icon { font-size: 48px; line-height: 1; flex-shrink: 0; } header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.5px; line-height: 1.1; } header p { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase; } .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 0; } .section { background: var(--card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 28px; box-shadow: 0 2px 12px var(--shadow); overflow: hidden; } .section-header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: var(--ink); color: white; } .section-header .num { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; min-width: 28px; } .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 1rem; font-weight: 400; letter-spacing: 0.02em; } .section-body { padding: 24px 28px; } .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; } .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px 28px; } label { display: block; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; } input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: var(--ink); background: white; transition: border-color 0.18s, box-shadow 0.18s; outline: none; appearance: none; } input:focus, select:focus, textarea:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(41,128,185,0.10); } input.calculated { background: #eaf4fb; border-color: #aed6f1; color: #1a5276; font-weight: 600; cursor: default; } input:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; } textarea { resize: vertical; min-height: 80px; } .checks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; } .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 3px; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: white; user-select: none; } .check-item:hover { border-color: var(--accent2); background: #f0f7fc; } .check-item input[type="checkbox"] { display: none; } .check-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; font-size: 11px; color: white; } .check-item input:checked ~ .check-box { background: var(--accent2); border-color: var(--accent2); } .check-item input:checked ~ .check-box::after { content: '✓'; } .check-item input:checked ~ .check-label { color: var(--accent2); font-weight: 500; } .check-label { font-size: 0.86rem; color: var(--ink); } .radio-group { display: flex; gap: 12px; margin-top: 2px; flex-wrap: wrap; } .radio-item { display: flex; align-items: center; gap: 7px; padding: 8px 18px; border: 1.5px solid var(--border); border-radius: 3px; cursor: pointer; transition: all 0.15s; background: white; font-size: 0.88rem; user-select: none; } .radio-item:hover { border-color: var(--accent2); background: #f0f7fc; } .radio-item input[type="radio"] { display: none; } .radio-dot { width: 14px; height: 14px; border: 2px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; } .radio-item input:checked ~ .radio-dot { border-color: var(--accent2); background: var(--accent2); box-shadow: inset 0 0 0 3px white; } .radio-item input:checked ~ span:last-child { color: var(--accent2); font-weight: 600; } .field-group { margin-bottom: 0; } /* ERC condicional */ .erc-conditional { overflow: hidden; max-height: 0; opacity: 0; pointer-events: none; transition: max-height 0.4s ease, opacity 0.3s ease; } .erc-conditional.active { max-height: 300px; opacity: 1; pointer-events: auto; } .erc-extra { margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px 28px; } #estadio-erc-display { padding: 10px 14px; border-radius: 3px; font-size: 0.88rem; font-weight: 600; background: #eaf4fb; border: 1.5px solid #aed6f1; color: #1a5276; min-height: 40px; display: flex; align-items: center; } /* Biopsia condicional */ #biopsia-resultado-group { transition: opacity 0.25s; opacity: 0.3; pointer-events: none; } #biopsia-resultado-group.active { opacity: 1; pointer-events: auto; } /* FGe badge */ .fge-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0; transition: opacity 0.3s; } .fge-badge.show { opacity: 1; } .fge-badge.g1 { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; } .fge-badge.g2 { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; } .fge-badge.g3a { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; } .fge-badge.g3b { background: #fdebd0; color: #a04000; border: 1px solid #f0b27a; } .fge-badge.g4 { background: #fdedec; color: #922b21; border: 1px solid #f1948a; } .fge-badge.g5 { background: #922b21; color: white; border: 1px solid #922b21; } .help-text { font-size: 0.72rem; color: var(--muted); margin-top: 4px; } .tiempo-unknown { display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer; user-select: none; } .tiempo-unknown input[type="checkbox"] { width: auto; cursor: pointer; accent-color: var(--accent2); display: inline-block; } .tiempo-unknown span { font-size: 0.8rem; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 400; } .actions { display: flex; gap: 14px; margin-top: 36px; justify-content: flex-end; flex-wrap: wrap; } .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: all 0.18s; } .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #a93226; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(192,57,43,0.3); } .btn-secondary { background: white; color: var(--ink); border: 1.5px solid var(--border); } .btn-secondary:hover { background: var(--paper); } .btn-excel { background: var(--success); color: white; } .btn-excel:hover { background: #1e8449; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(39,174,96,0.3); } #toast { position: fixed; bottom: 30px; right: 30px; background: var(--ink); color: white; padding: 14px 24px; border-radius: 4px; font-size: 0.88rem; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; display: flex; align-items: center; gap: 10px; max-width: 400px; } #toast.show { transform: translateY(0); opacity: 1; } #toast.success { border-left: 4px solid var(--success); } #toast.error { border-left: 4px solid var(--accent); } #db-section { background: var(--card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 28px; box-shadow: 0 2px 12px var(--shadow); overflow: hidden; } #db-section .section-header { background: #2c3e50; } .db-controls { padding: 16px 24px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; } .db-count { margin-left: auto; font-size: 0.8rem; color: var(--muted); font-weight: 500; } .table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; } table { width: 100%; border-collapse: collapse; font-size: 0.8rem; } thead th { background: var(--ink); color: rgba(255,255,255,0.85); padding: 9px 12px; text-align: left; font-weight: 500; letter-spacing: 0.04em; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; position: sticky; top: 0; z-index: 1; } tbody tr { border-bottom: 1px solid var(--border); } tbody tr:hover { background: #f0f7fc; } tbody td { padding: 8px 12px; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; } .no-data { text-align: center; padding: 32px; color: var(--muted); font-size: 0.9rem; }/* ═══════════════════════════════════════ KFRE — SECCIÓN 9═══════════════════════════════════════ */.kfre-section { border-left: 4px solid #2980b9; display: none; transition: all 0.3s ease;}.kfre-section-header { background: #1a3a4a !important;}.kfre-num { color: #5dade2 !important;}.kfre-input-panel { margin-bottom: 20px;}.kfre-vars-summary { padding: 10px 14px; background: #eaf4fb; border: 1.5px solid #aed6f1; border-radius: 3px; font-size: 0.82rem; color: #1a5276; line-height: 1.9; min-height: 42px; display: flex; align-items: center;}.kfre-display { background: linear-gradient(135deg, #1a2a3a 0%, #0d2035 100%); border-radius: 6px; padding: 24px; margin-top: 4px;}.kfre-display-header { font-family: 'DM Serif Display', serif; color: white; font-size: 1rem; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; letter-spacing: 0.01em;}.kfre-results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px;}.kfre-result-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 18px 14px; text-align: center;}.kfre-result-box-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.4); margin-bottom: 12px; font-weight: 600;}.kfre-result-box-value { font-family: 'DM Serif Display', serif; font-size: 2.6rem; line-height: 1; color: #a8c8e8; transition: color 0.4s;}.kfre-result-box-value.kfre-low { color: #58d68d; }.kfre-result-box-value.kfre-moderate { color: #f4d03f; }.kfre-result-box-value.kfre-high { color: #f0a500; }.kfre-result-box-value.kfre-very-high{ color: #e74c3c; }.kfre-result-box-value .kfre-pct { font-size: 1.4rem; opacity: 0.8;}.kfre-result-box-unit { font-size: 0.68rem; color: rgba(255,255,255,0.28); margin-top: 6px; line-height: 1.4;}.kfre-category-badge { display: inline-flex; align-items: center; gap: 6px; padding: 7px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 10px;}.kfre-cat-low { background: rgba(88,214,141,0.15); color: #58d68d; border: 1.5px solid rgba(88,214,141,0.4); }.kfre-cat-moderate { background: rgba(244,208,63,0.15); color: #f4d03f; border: 1.5px solid rgba(244,208,63,0.4); }.kfre-cat-high { background: rgba(240,165,0,0.15); color: #f0a500; border: 1.5px solid rgba(240,165,0,0.4); }.kfre-cat-very-high { background: rgba(231,76,60,0.18); color: #e74c3c; border: 1.5px solid rgba(231,76,60,0.4); }.kfre-pending-msg { text-align: center; padding: 28px; color: rgba(255,255,255,0.3); font-size: 0.85rem; font-style: italic;}.kfre-footer-note { font-size: 0.68rem; color: rgba(255,255,255,0.25); margin-top: 14px; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;}.kfre-warning-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 3px; background: rgba(230,126,34,0.2); border: 1px solid rgba(230,126,34,0.4); color: #e67e22; font-size: 0.72rem; font-weight: 600; margin-top: 10px;}@media(max-width:640px) { .grid-2, .grid-3, .erc-extra, .kfre-results-grid { grid-template-columns: 1fr; } header { padding: 20px 20px 16px; } .container { padding: 20px 12px 0; } .section-body { padding: 16px; }}
-/* ─── LOGIN ──────────────────────────────────────────────────────────────── */
-#login-overlay {
-  position: fixed; inset: 0; background: var(--ink);
-  display: flex; align-items: center; justify-content: center; z-index: 9000;
-}
-.login-card {
-  background: var(--card); border-radius: 6px; padding: 40px 44px;
-  width: 100%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-  border-top: 4px solid var(--accent);
-}
-.login-logo { font-size: 2.8rem; text-align: center; margin-bottom: 8px; }
-.login-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem;
-  text-align: center; color: var(--ink); margin-bottom: 4px; }
-.login-sub { font-size: 0.75rem; text-align: center; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 28px; }
-.login-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
-.login-input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
-  border-radius: 3px; font-size: 1rem; font-family: 'DM Sans', sans-serif;
-  color: var(--ink); outline: none; margin-bottom: 8px; }
-.login-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
-.login-btn { width: 100%; padding: 12px; background: var(--accent); color: white;
-  border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
-  cursor: pointer; margin-top: 8px; transition: background 0.18s; }
-.login-btn:hover { background: #a93226; }
-.login-error { font-size: 0.8rem; color: var(--accent); min-height: 18px;
-  margin-top: 6px; text-align: center; }
-#app-content { display: none; }
-/* botón cerrar sesión en header */
-.logout-btn { position: absolute; top: 16px; right: 20px;
-  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;
-  padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
-  font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
-  cursor: pointer; transition: all 0.15s; }
-.logout-btn:hover { background: rgba(255,255,255,0.18); color: white; }
+<!DOCTYPE html>
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Formularios CERCA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --card: #ffffff;
+    --primary: #1a5c4a;
+    --primary-light: #e8f5f0;
+    --accent: #e8734a;
+    --text: #1c1c1c;
+    --text-muted: #6b6b6b;
+    --border: #e0dbd4;
+    --shadow: 0 2px 20px rgba(26,92,74,0.08);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-/* ═══════════════════════════════════════
-   BÚSQUEDA RÁPIDA + PDF RESUMEN
-═══════════════════════════════════════ */
-#busqueda-rapida { background: #eaf4fb; border: 1.5px solid #aed6f1; border-radius: 4px; padding: 16px 22px; margin-bottom: 20px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-#busqueda-rapida label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #1a5276; margin-bottom: 6px; display: block; }
-#busqueda-rapida input { padding: 9px 14px; border: 1.5px solid #aed6f1; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; min-width: 200px; }
-#busqueda-rapida input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
-#busqueda-rapida-msg { font-size: 0.78rem; margin-top: 6px; width: 100%; }
-.btn-pdf { background: #8e44ad; color: white; }
-.btn-pdf:hover { background: #7d3c98; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(142,68,173,0.3); }
+  .header { background: var(--primary); padding: 28px 24px 24px; text-align: center; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05); top: -60px; right: -40px; }
+  .header::after  { content: ''; position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.04); bottom: -30px; left: 20px; }
+  .header-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 500; margin-bottom: 6px; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff; line-height: 1.1; }
+  .header p { margin-top: 8px; font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
 
-/* PDF modal */
-#pdf-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 8000; align-items: center; justify-content: center; }
-#pdf-modal.open { display: flex; }
-#pdf-modal-inner { background: white; border-radius: 6px; width: 95%; max-width: 720px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
-#pdf-modal-header { background: var(--ink); color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-radius: 6px 6px 0 0; }
-#pdf-modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; }
-#pdf-modal-close { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0 4px; }
-#pdf-modal-body { padding: 28px; }
-#pdf-modal-actions { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .offline-banner { display: none; background: #ff9800; color: #fff; text-align: center; padding: 8px 16px; font-size: 12px; font-weight: 600; }
+  .offline-banner.show { display: block; }
+  .pending-banner { display: none; background: #e8f5f0; color: var(--primary); text-align: center; padding: 8px 16px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .pending-banner.show { display: block; }
 
-/* PDF content styles (used for print too) */
-.pdf-resumen { font-family: 'DM Sans', sans-serif; color: #1a1a2e; font-size: 0.88rem; }
-.pdf-header-block { background: #1a1a2e; color: white; padding: 20px 24px; border-radius: 4px; margin-bottom: 20px; }
-.pdf-header-block h2 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 4px; font-weight: 400; }
-.pdf-header-block p { font-size: 0.75rem; color: rgba(255,255,255,0.55); }
-.pdf-section-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #7f8c8d; font-weight: 700; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; margin: 18px 0 10px; }
-.pdf-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.pdf-field { background: #f8f9fa; border-radius: 3px; padding: 8px 10px; }
-.pdf-field-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.07em; color: #7f8c8d; font-weight: 600; margin-bottom: 2px; }
-.pdf-field-value { font-size: 0.85rem; color: #1a1a2e; font-weight: 500; }
-.pdf-field-value.highlight { color: #2980b9; font-weight: 700; }
-.pdf-field-value.alert { color: #922b21; font-weight: 700; }
-.pdf-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-.pdf-chip { font-size: 0.72rem; padding: 3px 9px; border-radius: 10px; background: #eaf4fb; border: 1px solid #aed6f1; color: #1a5276; }
-.pdf-chip.med { background: #eafaf1; border-color: #a9dfbf; color: #1e8449; }
-.pdf-kfre-box { background: linear-gradient(135deg, #1a2a3a, #0d1f2d); border-radius: 4px; padding: 16px; margin-top: 10px; color: white; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-.pdf-kfre-val { text-align: center; }
-.pdf-kfre-num { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #a8c8e8; line-height: 1; }
-.pdf-kfre-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-top: 3px; }
-.pdf-timeline-mini { margin-top: 8px; }
-.pdf-visit-row { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; align-items: baseline; font-size: 0.8rem; }
-.pdf-visit-fecha { color: #7f8c8d; min-width: 80px; font-size: 0.73rem; }
-.pdf-visit-fge { font-weight: 700; color: #1a1a2e; min-width: 60px; }
-.pdf-visit-delta { font-size: 0.72rem; font-weight: 600; }
-.pdf-visit-delta.neg { color: #922b21; }
-.pdf-visit-delta.pos { color: #1e8449; }
-.pdf-footer { margin-top: 20px; font-size: 0.65rem; color: #aaa; text-align: center; border-top: 1px solid #e0e0e0; padding-top: 10px; }
-@media print {
-  body > *:not(#pdf-print-area) { display: none !important; }
-  #pdf-print-area { display: block !important; padding: 20px; }
-  .pdf-resumen { font-size: 10pt; }
-}
+  .steps-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: var(--border); color: var(--text-muted); transition: all 0.3s; flex-shrink: 0; }
+  .step-dot.active { background: var(--primary); color: #fff; }
+  .step-dot.done   { background: var(--primary-light); color: var(--primary); }
+  .step-line { height: 2px; flex: 1; background: var(--border); max-width: 40px; transition: background 0.3s; }
+  .step-line.done { background: var(--primary); }
+  .steps-labels { display: flex; justify-content: space-around; padding: 0 20px 10px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .steps-labels span { font-size: 10px; color: var(--text-muted); text-align: center; width: 60px; }
+  .steps-labels span.active { color: var(--primary); font-weight: 600; }
 
-/* ═══════════════════════════════════════
-   BÚSQUEDA RÁPIDA POR HC
-═══════════════════════════════════════ */
-#buscar-hc-bar { background: #eaf4fb; border: 1.5px solid #aed6f1; border-radius: 4px; padding: 14px 20px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-#buscar-hc-bar label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #1a5276; margin-bottom: 5px; display: block; }
-#buscar-hc-bar input { padding: 9px 13px; border: 1.5px solid #aed6f1; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; outline: none; min-width: 200px; }
-#buscar-hc-bar input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
-/* ═══════════════════════════════════════
-   PDF RESUMEN
-═══════════════════════════════════════ */
-.btn-pdf { background: #8e44ad; color: white; }
-.btn-pdf:hover { background: #7d3c98; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(142,68,173,0.3); }
+  .screen { display: none; padding: 24px; }
+  .screen.active { display: block; }
 
-/* ═══════════════════════════════════════
-   PANEL ANALYTICS
-═══════════════════════════════════════ */
-#analytics-section { background: var(--card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 28px; box-shadow: 0 2px 12px var(--shadow); overflow: hidden; }
-#analytics-section .section-header { background: #1a3a2a; }
-.analytics-num { color: #58d68d !important; }
-.analytics-body { padding: 24px 28px; }
-.analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-.stat-card { background: white; border: 1.5px solid var(--border); border-radius: 4px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden; }
-.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent2); }
-.stat-card.green::before { background: #27ae60; }
-.stat-card.orange::before { background: #e67e22; }
-.stat-card.red::before { background: var(--accent); }
-.stat-card.blue::before { background: var(--accent2); }
-.stat-card.purple::before { background: #8e44ad; }
-.stat-val { font-family: 'DM Serif Display', serif; font-size: 2.2rem; line-height: 1; color: var(--ink); margin-bottom: 4px; }
-.stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
-.stat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
-.analytics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-.chart-box { background: white; border: 1.5px solid var(--border); border-radius: 4px; padding: 18px; }
-.chart-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
-.bar-chart { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: flex; align-items: center; gap: 10px; }
-.bar-label { font-size: 0.75rem; color: var(--ink); min-width: 60px; text-align: right; font-weight: 500; }
-.bar-track { flex: 1; background: #f0f0f0; border-radius: 2px; height: 20px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
-.bar-fill span { font-size: 0.68rem; color: white; font-weight: 700; white-space: nowrap; }
-.bar-g1 { background: #27ae60; }
-.bar-g2 { background: #52be80; }
-.bar-g3a { background: #f4d03f; }
-.bar-g3b { background: #e67e22; }
-.bar-g4 { background: #e74c3c; }
-.bar-g5 { background: #922b21; }
-.bar-generic { background: var(--accent2); }
-.alerts-box { background: white; border: 1.5px solid var(--border); border-radius: 4px; padding: 18px; }
-.alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 3px; margin-bottom: 8px; font-size: 0.82rem; }
-.alert-item:last-child { margin-bottom: 0; }
-.alert-critical { background: #fdedec; border-left: 3px solid var(--accent); color: #922b21; }
-.alert-warning { background: #fef9e7; border-left: 3px solid #f4d03f; color: #9a7d0a; }
-.alert-info { background: #eaf4fb; border-left: 3px solid var(--accent2); color: #1a5276; }
-.alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-.alert-text strong { display: block; font-weight: 600; margin-bottom: 2px; }
-.no-alerts { text-align: center; padding: 20px; color: var(--muted); font-size: 0.85rem; }
-.analytics-footer { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 8px; }
-.pct-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.pct-pill { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 20px; background: #f0f7fc; border: 1px solid #aed6f1; font-size: 0.75rem; color: #1a5276; }
-.pct-pill strong { font-weight: 700; }
-@media(max-width:640px) { .analytics-grid { grid-template-columns: 1fr 1fr; } .analytics-row { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--primary); margin-bottom: 6px; }
+  .section-subtitle { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+  .section-intro { font-size: 14px; color: var(--text); line-height: 1.65; background: var(--primary-light); border-left: 3px solid var(--primary); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 20px; }
 
-/* ═══════════════════════════════════════
-   SEGUIMIENTO LONGITUDINAL
-═══════════════════════════════════════ */
-#seguimiento-section { background: var(--card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 28px; box-shadow: 0 2px 12px var(--shadow); overflow: hidden; display: none; }
-#seguimiento-section .section-header { background: #1a2a3a; }
-.seg-num { color: #f39c12 !important; }
-.seg-body { padding: 24px 28px; }
-.seg-search-bar { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; }
-.seg-search-bar input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; outline: none; }
-.seg-search-bar input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
-.seg-patient-header { background: linear-gradient(135deg, #1a2a3a, #0d1f2d); border-radius: 5px; padding: 18px 22px; margin-bottom: 20px; color: white; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.seg-patient-id { font-family: 'DM Serif Display', serif; font-size: 1.4rem; }
-.seg-patient-meta { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
-.seg-kpis { display: flex; gap: 14px; margin-left: auto; flex-wrap: wrap; }
-.seg-kpi { text-align: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.1); }
-.seg-kpi-val { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #a8c8e8; line-height: 1; }
-.seg-kpi-val.delta-neg { color: #e74c3c; }
-.seg-kpi-val.delta-pos { color: #58d68d; }
-.seg-kpi-val.delta-neu { color: #f4d03f; }
-.seg-kpi-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-top: 4px; }
-.seg-timeline { position: relative; }
-.seg-timeline::before { content: ''; position: absolute; left: 110px; top: 0; bottom: 0; width: 2px; background: var(--border); }
-.seg-visit { display: flex; gap: 0; margin-bottom: 0; position: relative; }
-.seg-visit-date { width: 110px; padding: 12px 16px 12px 0; text-align: right; flex-shrink: 0; }
-.seg-visit-date-text { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
-.seg-visit-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent2); border: 2px solid white; box-shadow: 0 0 0 2px var(--accent2); flex-shrink: 0; margin-top: 14px; z-index: 1; }
-.seg-visit-dot.first { background: #27ae60; box-shadow: 0 0 0 2px #27ae60; }
-.seg-visit-dot.last { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-.seg-visit-card { flex: 1; margin: 8px 0 8px 16px; background: white; border: 1.5px solid var(--border); border-radius: 4px; padding: 14px 16px; }
-.seg-visit-fge { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--ink); }
-.seg-visit-fge-unit { font-size: 0.72rem; color: var(--muted); }
-.seg-visit-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
-.seg-visit-delta.neg { background: #fdedec; color: #922b21; }
-.seg-visit-delta.pos { background: #eafaf1; color: #1e8449; }
-.seg-visit-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-.seg-visit-labs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.seg-lab-chip { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: #f0f7fc; border: 1px solid #aed6f1; color: #1a5276; }
-.seg-lab-chip.alert { background: #fdedec; border-color: #f1948a; color: #922b21; }
-.seg-chart-container { margin-top: 20px; padding: 16px; background: #f8f9fa; border-radius: 4px; border: 1px solid var(--border); }
-.seg-chart-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
-.seg-svg-wrap { width: 100%; overflow-x: auto; }
-.seg-no-results { text-align: center; padding: 32px; color: var(--muted); font-size: 0.88rem; }
+  .field-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; display: block; }
+  .text-input { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 20px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: var(--text); background: var(--bg); letter-spacing: 0.08em; transition: border-color 0.2s; -webkit-appearance: none; }
+  .text-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+  .text-input::placeholder { color: var(--border); }
 
-</style></head><body><div id="login-overlay">
-  <div class="login-card">
-    <div class="login-logo">🩺</div>
-    <div class="login-title">Registro Nefrológico</div>
-    <div class="login-sub">Acceso restringido · Ingresá tus credenciales</div>
-    <label class="login-label" for="login-user">Usuario</label>
-    <input class="login-input" type="text" id="login-user" placeholder="Ej: Nefrologia"
-      onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()" autocomplete="username">
-    <label class="login-label" for="login-password" style="margin-top:12px;">Contraseña</label>
-    <input class="login-input" type="password" id="login-password" placeholder="••••••••"
-      onkeydown="if(event.key==='Enter') intentarLogin()" autocomplete="current-password">
-    <div class="login-error" id="login-error"></div>
-    <button class="login-btn" id="login-btn" onclick="intentarLogin()">Ingresar</button>
+  .esas-item { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .esas-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .esas-labels { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .esas-label-left { font-size: 13px; font-weight: 600; color: var(--primary); max-width: 45%; line-height: 1.3; }
+  .esas-label-right { font-size: 11px; color: var(--text-muted); max-width: 45%; text-align: right; line-height: 1.3; }
+  .esas-scale { display: flex; gap: 4px; justify-content: space-between; }
+  .esas-btn { flex: 1; height: 42px; border: 2px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .esas-btn:active { transform: scale(0.93); }
+  .esas-btn[data-val="0"].selected, .esas-btn[data-val="1"].selected, .esas-btn[data-val="2"].selected { background: #2e9e6e; border-color: #2e9e6e; color: #fff; }
+  .esas-btn[data-val="3"].selected, .esas-btn[data-val="4"].selected { background: #8bc34a; border-color: #8bc34a; color: #333; }
+  .esas-btn[data-val="5"].selected { background: #ffc107; border-color: #ffc107; color: #333; }
+  .esas-btn[data-val="6"].selected, .esas-btn[data-val="7"].selected { background: #ff9800; border-color: #ff9800; color: #fff; }
+  .esas-btn[data-val="8"].selected, .esas-btn[data-val="9"].selected, .esas-btn[data-val="10"].selected { background: #e53935; border-color: #e53935; color: #fff; }
+  .esas-selected-val { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 6px; min-height: 16px; }
+  .otro-field { margin-top: 10px; }
+  .otro-input { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin-bottom: 8px; }
+  .otro-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+  .mmas-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .mmas-item:last-child { border-bottom: none; }
+  .mmas-question { font-size: 14px; line-height: 1.5; color: var(--text); margin-bottom: 12px; }
+  .mmas-question em { font-style: normal; font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
+  .mmas-options { display: flex; gap: 10px; }
+  .mmas-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+  .mmas-btn:active { transform: scale(0.95); }
+  .mmas-btn.si.selected { background: #e53935; border-color: #e53935; color: #fff; }
+  .mmas-btn.no.selected { background: #2e9e6e; border-color: #2e9e6e; color: #fff; }
+  .freq-options { display: flex; flex-direction: column; gap: 8px; }
+  .freq-btn { padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; background: #fff; font-size: 14px; cursor: pointer; text-align: left; transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-family: 'DM Sans', sans-serif; }
+  .freq-btn:active { transform: scale(0.98); }
+  .freq-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .nav-area { padding: 0 24px 32px; display: flex; gap: 12px; }
+  .btn-back { padding: 16px 24px; border: 2px solid var(--border); border-radius: 12px; background: transparent; font-size: 15px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-next { flex: 1; padding: 16px; border: none; border-radius: 12px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; -webkit-tap-highlight-color: transparent; }
+  .btn-next:active { opacity: 0.85; }
+
+  .success-screen { text-align: center; padding: 48px 24px; }
+  .success-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
+  .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--primary); margin-bottom: 12px; }
+  .success-text { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+  .success-offline { display: none; margin-top: 16px; background: #fff3e0; border-radius: 12px; padding: 16px; font-size: 13px; color: #e65100; line-height: 1.5; }
+  .success-offline.show { display: block; }
+  .pdf-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .pdf-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+  .btn-pdf { display: block; width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 12px; background: transparent; color: var(--primary); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; margin-bottom: 10px; -webkit-tap-highlight-color: transparent; }
+  .btn-pdf:active { background: var(--primary-light); }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1c1c1c; color: #fff; padding: 12px 20px; border-radius: 100px; font-size: 13px; z-index: 999; transition: transform 0.3s; white-space: nowrap; max-width: 90vw; text-align: center; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(245,242,238,0.9); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loading-overlay.show { display: flex; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text-muted); }
+
+  .progress-bar { height: 3px; background: var(--border); position: relative; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Enviando datos…</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="offline-banner" id="offlineBanner">📵 Sin conexión — los datos se guardarán y enviarán cuando vuelva la señal</div>
+<div class="pending-banner" id="pendingBanner" onclick="flushQueue()"></div>
+
+<div class="header">
+  <div class="header-label">Centro CERCA</div>
+  <h1>Evaluación<br>del paciente</h1>
+  <p>Complete los formularios con calma.<br>Sus respuestas son confidenciales.</p>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="steps-bar">
+  <div class="step-dot active" id="dot1">1</div>
+  <div class="step-line" id="line1"></div>
+  <div class="step-dot" id="dot2">2</div>
+  <div class="step-line" id="line2"></div>
+  <div class="step-dot" id="dot3">3</div>
+</div>
+<div class="steps-labels">
+  <span class="active" id="lbl1">Identificación</span>
+  <span id="lbl2">Síntomas</span>
+  <span id="lbl3">Medicación</span>
+</div>
+
+<!-- SCREEN 1: DNI -->
+<div class="screen active" id="screen1">
+  <div class="card">
+    <div class="section-title">Bienvenido/a</div>
+    <div class="section-subtitle">Para comenzar, ingrese su número de DNI. No se guardará su nombre.</div>
+    <label class="field-label" for="dniInput">Número de DNI</label>
+    <input type="number" inputmode="numeric" pattern="[0-9]*" id="dniInput" class="text-input" placeholder="Ej: 30123456" maxlength="9">
   </div>
 </div>
-<div id="app-content">
-<header> <button class="logout-btn" onclick="cerrarSesion()">Cerrar sesión</button>
- <span class="logout-btn" id="user-display" style="right:140px;background:rgba(39,174,96,0.2);border-color:rgba(39,174,96,0.4);color:#58d68d;cursor:default;"></span>
- <div class="header-icon">🩺</div> <div> <h1>Registro Nefrológico</h1> <p>Sistema de carga y seguimiento de pacientes · CKD-EPI + KFRE automáticos</p> </div></header><div class="container"><!-- BÚSQUEDA RÁPIDA PARA CARGAR SEGUIMIENTO -->
-<div id="busqueda-rapida">
-  <div style="flex:1;min-width:200px;">
-    <label for="busq-hc-input">🔍 Buscar paciente por N° HC para nuevo seguimiento</label>
-    <input type="text" id="busq-hc-input" placeholder="Ingresá N° HC y presioná Enter..." 
-      onkeydown="if(event.key==='Enter') precargarPaciente()">
-    <div id="busqueda-rapida-msg"></div>
-  </div>
-  <button type="button" class="btn btn-secondary" onclick="precargarPaciente()" style="padding:9px 18px;font-size:0.84rem;">Cargar datos</button>
-  <button type="button" class="btn btn-pdf" onclick="abrirPDFdesdeHC()" style="padding:9px 18px;font-size:0.84rem;">📄 PDF resumen</button>
+<div class="nav-area" id="nav1">
+  <button class="btn-next" onclick="goToESAS()">Comenzar →</button>
 </div>
-<form id="main-form" autocomplete="off">
-<!-- BÚSQUEDA RÁPIDA POR HC -->
-<div id="buscar-hc-bar">
-  <div style="flex:1;">
-    <label for="buscar-hc-input">🔍 Cargar visita anterior — ingresá N° HC</label>
-    <input type="text" id="buscar-hc-input" placeholder="Ej: 456787 — se precargarán los antecedentes de la última visita..." onkeydown="if(event.key==='Enter') precargarPaciente()">
-  </div>
-  <button type="button" class="btn btn-secondary" onclick="precargarPaciente()" style="padding:9px 18px;font-size:0.82rem;">Precargar datos</button>
-  <button type="button" class="btn btn-pdf" onclick="exportarPDFPaciente()" style="padding:9px 18px;font-size:0.82rem;">🖨 PDF resumen</button>
-</div>
-<!-- 1. Identificación --> <div class="section"> <div class="section-header"><span class="num">1</span><h2>Identificación del Paciente</h2></div> <div class="section-body"> <div class="grid-3"> <div class="field-group"> <label for="hc">N° Historia Clínica</label> <input type="text" id="hc" placeholder="Ej: 00123456" required> </div> <div class="field-group"> <label for="edad">Edad (años)</label> <input type="number" id="edad" min="0" max="120" placeholder="Ej: 65" required> </div> <div class="field-group"> <label for="sexo">Sexo biológico</label> <select id="sexo" required> <option value="">— Seleccionar —</option> <option value="Masculino">Masculino</option> <option value="Femenino">Femenino</option> </select> </div> <div class="field-group"> <label for="fecha">Fecha de consulta</label> <input type="date" id="fecha" required> </div> <div class="field-group"> <label for="hospital">Hospital</label> <select id="hospital"> <option value="">— Seleccionar —</option> <option value="Ramos Mejía">Ramos Mejía</option> <option value="Favaloro">Favaloro</option> <option value="Hospital Alemán">Hospital Alemán</option> </select> </div> <div class="field-group"> <label for="cobertura">Cobertura</label> <select id="cobertura"> <option value="">— Seleccionar —</option> <option value="No">No</option> <option value="Obra Social">Obra Social</option> <option value="Prepaga">Prepaga</option> </select> </div> </div> </div> </div> <!-- 2. Motivo --> <div class="section"> <div class="section-header"><span class="num">2</span><h2>Motivo de Consulta</h2></div> <div class="section-body"> <label for="motivo">Descripción libre</label> <textarea id="motivo" placeholder="Describir el motivo de consulta..."></textarea> </div> </div> <!-- 3. Antecedentes --> <div class="section"> <div class="section-header"><span class="num">3</span><h2>Antecedentes</h2></div> <div class="section-body"> <div class="checks-grid"> <label class="check-item"> <input type="checkbox" id="erc" value="1"> <span class="check-box"></span> <span class="check-label">Enfermedad Renal Crónica</span> </label> <label class="check-item"> <input type="checkbox" id="coronaria" value="1"> <span class="check-box"></span> <span class="check-label">Enfermedad Coronaria</span> </label> <label class="check-item"> <input type="checkbox" id="ic" value="1"> <span class="check-box"></span> <span class="check-label">Insuficiencia Cardíaca</span> </label> <label class="check-item"> <input type="checkbox" id="hta" value="1"> <span class="check-box"></span> <span class="check-label">HTA</span> </label> <label class="check-item"> <input type="checkbox" id="tabaquismo" value="1"> <span class="check-box"></span> <span class="check-label">Tabaquismo</span> </label> <label class="check-item"> <input type="checkbox" id="evp" value="1"> <span class="check-box"></span> <span class="check-label">Enf. Vascular Periférica</span> </label> <label class="check-item"> <input type="checkbox" id="dbt" value="1"> <span class="check-box"></span> <span class="check-label">Diabetes</span> </label> <label class="check-item"> <input type="checkbox" id="oncologica" value="1"> <span class="check-box"></span> <span class="check-label">Enf. Oncológica</span> </label> <label class="check-item"> <input type="checkbox" id="autoinmune" value="1"> <span class="check-box"></span> <span class="check-label">Enf. Autoinmune</span> </label> <label class="check-item"> <input type="checkbox" id="litiasis" value="1"> <span class="check-box"></span> <span class="check-label">Litiasis Renal</span> </label> <label class="check-item"> <input type="checkbox" id="itu" value="1"> <span class="check-box"></span> <span class="check-label">ITU a Repetición</span> </label> <label class="check-item"> <input type="checkbox" id="hiv" value="1"> <span class="check-box"></span> <span class="check-label">HIV</span> </label> <label class="check-item"> <input type="checkbox" id="evento-cv" value="1"> <span class="check-box"></span> <span class="check-label">Evento CV (IAM/ACV)</span> </label> <label class="check-item"> <input type="checkbox" id="monorreno" value="1"> <span class="check-box"></span> <span class="check-label">Monorreno</span> </label> <label class="check-item"> <input type="checkbox" id="dislipemia" value="1"> <span class="check-box"></span> <span class="check-label">Dislipemia (DLP)</span> </label> <label class="check-item"> <input type="checkbox" id="poliquistosis" value="1"> <span class="check-box"></span> <span class="check-label">Poliquistosis Renal</span> </label> <label class="check-item"> <input type="checkbox" id="aines" value="1"> <span class="check-box"></span> <span class="check-label">AINEs / Nefrotóxico</span> </label> <label class="check-item"> <input type="checkbox" id="uropatia" value="1"> <span class="check-box"></span> <span class="check-label">Uropatía Obstructiva</span> </label> <label class="check-item"> <input type="checkbox" id="aki-previo" value="1"> <span class="check-box"></span> <span class="check-label">AKI Previo</span> </label> <label class="check-item"> <input type="checkbox" id="glomerulopatia" value="1"> <span class="check-box"></span> <span class="check-label">Glomerulopatía</span> </label> </div> <!-- ERC campos adicionales — solo visibles si ERC está tildado --> <div class="erc-conditional" id="erc-extra-group"> <div class="erc-extra"> <div class="field-group"> <label>Estadio ERC (KDIGO)</label> <div id="estadio-erc-display">— Ingresá el FGe en Laboratorio —</div> <p class="help-text">Se actualiza automáticamente con el FGe calculado.</p> </div> <div class="field-group"> <label for="tiempo-erc">Tiempo de evolución de ERC</label> <input type="number" id="tiempo-erc" min="0" step="0.5" placeholder="Años (Ej: 3.5)"> <label class="tiempo-unknown"> <input type="checkbox" id="tiempo-desconocido" onchange="toggleTiempoERC()"> <span>Tiempo desconocido (se guardará como dato faltante)</span> </label> </div> </div> </div> </div> </div> <!-- 4. Examen Físico --> <div class="section"> <div class="section-header"><span class="num">4</span><h2>Examen Físico</h2></div> <div class="section-body"> <div class="grid-3"> <div class="field-group"> <label for="tas">T.A. Sistólica (mmHg)</label> <input type="number" id="tas" min="50" max="300" placeholder="Ej: 130"> </div> <div class="field-group"> <label for="tad">T.A. Diastólica (mmHg)</label> <input type="number" id="tad" min="30" max="200" placeholder="Ej: 80"> </div> <div class="field-group"> <label>Edemas</label> <div class="radio-group"> <label class="radio-item"> <input type="radio" name="edemas" value="Sí"> <span class="radio-dot"></span><span>Sí</span> </label> <label class="radio-item"> <input type="radio" name="edemas" value="No" checked> <span class="radio-dot"></span><span>No</span> </label> </div> </div> <div class="field-group"> <label for="peso">Peso (kg)</label> <input type="number" id="peso" min="20" max="300" step="0.1" placeholder="Ej: 82.5"> </div> <div class="field-group"> <label for="talla">Talla (cm)</label> <input type="number" id="talla" min="100" max="220" step="0.5" placeholder="Ej: 168"> </div> <div class="field-group"> <label for="imc">IMC (kg/m2)</label> <input type="text" id="imc" class="calculated" readonly placeholder="Calculado automáticamente"> <div class="fge-badge" id="imc-badge"></div> </div> </div> </div> </div> <!-- 5. Laboratorio --> <div class="section"> <div class="section-header"><span class="num">5</span><h2>Laboratorio</h2></div> <div class="section-body"> <div class="grid-3"> <div class="field-group"> <label for="urea">Urea (mg/dL)</label> <input type="number" id="urea" min="0" step="0.1" placeholder="Ej: 42.0"> </div> <div class="field-group"> <label for="creatinina">Creatinina (mg/dL)</label> <input type="number" id="creatinina" min="0" step="0.01" placeholder="Ej: 1.20"> </div> <div class="field-group"> <label for="fge">FGe CKD-EPI (mL/min/1.73m2)</label> <input type="text" id="fge" class="calculated" readonly placeholder="Calculado automáticamente"> <div class="fge-badge" id="fge-badge"></div> </div> <div class="field-group"> <label for="proteinuria">Proteinuria (mg/24 hs)</label> <input type="number" id="proteinuria" min="0" step="1" placeholder="Ej: 450"> </div> <div class="field-group"> <label for="albuminuria">Albuminuria (mg/24 hs)</label> <input type="number" id="albuminuria" min="0" step="1" placeholder="Ej: 180"> <div class="fge-badge" id="alb-badge"></div> </div> <div class="field-group"> <label for="hb">Hemoglobina (g/dL)</label> <input type="number" id="hb" min="0" step="0.1" placeholder="Ej: 11.5"> </div> <div class="field-group"> <label for="potasio">Potasio (mEq/L)</label> <input type="number" id="potasio" min="0" step="0.1" placeholder="Ej: 4.8"> </div> <div class="field-group"> <label for="pth">PTH (pg/mL)</label> <input type="number" id="pth" min="0" step="0.1" placeholder="Ej: 120.0"> </div> <div class="field-group"> <label for="hco3">Bicarbonato HCO&#x2083; (mEq/L)</label> <input type="number" id="hco3" min="0" step="0.1" placeholder="Ej: 22.0"> </div> <div class="field-group"> <label for="acido-urico">Ácido Úrico (mg/dL)</label> <input type="number" id="acido-urico" min="0" step="0.1" placeholder="Ej: 7.2"> </div> <div class="field-group"> <label for="ferritina">Ferritina (ng/mL)</label> <input type="number" id="ferritina" min="0" step="0.1" placeholder="Ej: 250.0"> </div> <div class="field-group"> <label for="ldl">Colesterol LDL (mg/dL)</label> <input type="number" id="ldl" min="0" step="0.1" placeholder="Ej: 110.0"> </div> <div class="field-group"> <label for="calcio">Calcio (mg/dL)</label> <input type="number" id="calcio" min="0" step="0.01" placeholder="Ej: 9.2"> </div> <div class="field-group"> <label for="fosforo">Fósforo (mg/dL)</label> <input type="number" id="fosforo" min="0" step="0.01" placeholder="Ej: 4.1"> </div> <div class="field-group"> <label for="glucemia">Glucemia (mg/dL)</label> <input type="number" id="glucemia" min="0" step="0.1" placeholder="Ej: 98.0"> </div> <div class="field-group"> <label for="hba1c">HbA1c (%)</label> <input type="number" id="hba1c" min="0" step="0.1" placeholder="Ej: 7.2"> </div> <div class="field-group"> <label for="sodio">Sodio (mEq/L)</label> <input type="number" id="sodio" min="0" step="0.1" placeholder="Ej: 140.0"> </div> <div class="field-group"> <label for="cloro">Cloro (mEq/L)</label> <input type="number" id="cloro" min="0" step="0.1" placeholder="Ej: 104.0"> </div> </div> <p class="help-text" style="margin-top:16px">* FGe calculado con CKD-EPI 2021 a partir de creatinina, edad y sexo.</p> </div> </div> <!-- 6. Estudios complementarios --> <div class="section"> <div class="section-header"><span class="num">6</span><h2>Otros Exámenes Complementarios</h2></div> <div class="section-body"> <div class="grid-2"> <div class="field-group"> <label>Biopsia renal</label> <div class="radio-group"> <label class="radio-item"> <input type="radio" name="biopsia" value="Sí" id="biopsia-si"> <span class="radio-dot"></span><span>Sí</span> </label> <label class="radio-item"> <input type="radio" name="biopsia" value="No" id="biopsia-no" checked> <span class="radio-dot"></span><span>No</span> </label> </div> </div> <div class="field-group" id="biopsia-resultado-group"> <label for="biopsia-resultado">Resultado de biopsia renal</label> <input type="text" id="biopsia-resultado" placeholder="Ej: Nefropatía por IgA, GSFS..."> </div> </div> </div> </div> <!-- 7. Outcome --> <div class="section"> <div class="section-header"><span class="num">7</span><h2>Outcome / Evolución</h2></div> <div class="section-body"> <div class="grid-3"> <div class="field-group"> <label>AKI / AKD</label> <div class="radio-group"> <label class="radio-item"><input type="radio" name="aki" value="Sí"><span class="radio-dot"></span><span>Sí</span></label> <label class="radio-item"><input type="radio" name="aki" value="No" checked><span class="radio-dot"></span><span>No</span></label> </div> </div> <div class="field-group" id="aki-causal-group" style="opacity:0.3;pointer-events:none;transition:opacity 0.25s;grid-column:1/-1;"> <label for="aki-causal">Causa Sospechada de AKI/AKD</label> <input type="text" id="aki-causal" placeholder="Ej: prerrenal por deshidratación, nefrotóxico (AINE), obstructivo..."> </div> <div class="field-group"> <label>Requerimiento de diálisis</label> <div class="radio-group"> <label class="radio-item"><input type="radio" name="dialisis" value="Sí"><span class="radio-dot"></span><span>Sí</span></label> <label class="radio-item"><input type="radio" name="dialisis" value="No" checked><span class="radio-dot"></span><span>No</span></label> </div> </div> <div class="field-group"> <label>Internación</label> <div class="radio-group"> <label class="radio-item"><input type="radio" name="internacion" value="Sí"><span class="radio-dot"></span><span>Sí</span></label> <label class="radio-item"><input type="radio" name="internacion" value="No" checked><span class="radio-dot"></span><span>No</span></label> </div> </div> <div class="field-group"> <label>MACE</label> <div class="radio-group"> <label class="radio-item"><input type="radio" name="mace" value="Sí"><span class="radio-dot"></span><span>Sí</span></label> <label class="radio-item"><input type="radio" name="mace" value="No" checked><span class="radio-dot"></span><span>No</span></label> </div> <p class="help-text" style="margin-top:6px">Tildar si el paciente presentó IAM, ACV o revascularización durante el seguimiento.</p> </div> <div class="field-group"> <label>Óbito (Muerte)</label> <div class="radio-group"> <label class="radio-item"><input type="radio" name="obito" value="Sí"><span class="radio-dot"></span><span>Sí</span></label> <label class="radio-item"><input type="radio" name="obito" value="No" checked><span class="radio-dot"></span><span>No</span></label> </div> </div> <div class="field-group" id="fecha-dialisis-group" style="opacity:0.3;pointer-events:none;transition:opacity 0.25s;"> <label for="fecha-dialisis">Fecha de Inicio de Diálisis</label> <input type="date" id="fecha-dialisis"> <p class="help-text" style="margin-top:4px">Se habilita al seleccionar diálisis Sí.</p> </div> </div> </div> </div> <!-- 8. Medicación --> <div class="section"> <div class="section-header"><span class="num">8</span><h2>Medicación</h2></div> <div class="section-body"> <div class="checks-grid"> <label class="check-item"> <input type="checkbox" id="ieca" value="1"> <span class="check-box"></span> <span class="check-label">IECA / ARA II</span> </label> <label class="check-item"> <input type="checkbox" id="bb" value="1"> <span class="check-box"></span> <span class="check-label">BB (Betabloqueantes)</span> </label> <label class="check-item"> <input type="checkbox" id="isglt2" value="1"> <span class="check-box"></span> <span class="check-label">iSGLT2</span> </label> <label class="check-item"> <input type="checkbox" id="mra" value="1"> <span class="check-box"></span> <span class="check-label">MRA</span> </label> <label class="check-item"> <input type="checkbox" id="inmunosupresion" value="1"> <span class="check-box"></span> <span class="check-label">Inmunosupresión</span> </label> <label class="check-item"> <input type="checkbox" id="epo" value="1"> <span class="check-box"></span> <span class="check-label">Uso de EPO</span> </label> <label class="check-item"> <input type="checkbox" id="glp1" value="1"> <span class="check-box"></span> <span class="check-label">GLP-1</span> </label> <label class="check-item"> <input type="checkbox" id="med_obesidad" value="1"> <span class="check-box"></span> <span class="check-label">Medicación Obesidad</span> </label> <label class="check-item"> <input type="checkbox" id="estatinas" value="1"> <span class="check-box"></span> <span class="check-label">Estatinas</span> </label> <label class="check-item"> <input type="checkbox" id="diureticos" value="1"> <span class="check-box"></span> <span class="check-label">Diuréticos (Asa/Tiazidas)</span> </label> <label class="check-item"> <input type="checkbox" id="aas" value="1"> <span class="check-box"></span> <span class="check-label">Aspirina (AAS) / Antiagregantes</span> </label> <label class="check-item"> <input type="checkbox" id="quelantes" value="1"> <span class="check-box"></span> <span class="check-label">Quelantes de Fósforo / Vit. D</span> </label> </div> </div> </div> <!-- 9. KFRE — Riesgo de Progresión ERC --> <div class="section kfre-section" id="kfre-section"> <div class="section-header kfre-section-header"> <span class="num kfre-num">9</span> <h2>Riesgo de Progresión ERC — Score KFRE</h2> </div> <div class="section-body"> <div class="kfre-input-panel"> <label>Variables utilizadas para el cálculo</label> <div class="kfre-vars-summary" id="kfre-vars-summary"> — Completá edad, sexo, creatinina y albuminuria (Sección 5) para ver el score — </div> <p class="help-text" style="margin-top:5px;"> Calculado con: <strong>Edad · Sexo · FGe CKD-EPI · Albuminuria 24h</strong> — la albuminuria mg/24h se usa como proxy del ACR (asume creatinuria urinaria ~1 g/día). </p> </div> <div class="kfre-display"> <div class="kfre-display-header"> 📊 Score KFRE — Riesgo de Progresión a Falla Renal Terminal </div> <div id="kfre-content"> <div class="kfre-pending-msg"> Ingresá la albuminuria (Sección 5) y completá edad, sexo y creatinina para calcular el riesgo KFRE automáticamente. </div> </div> </div> <p class="help-text" style="margin-top:14px; line-height:1.6;"> * <strong>KFRE 4 variables</strong> (Tangri N et al., <em>JAMA</em> 2011; validación multinacional <em>JAMA</em> 2016). Indicado para ERC estadios G3–G5 (FGe 15–59 mL/min/1.73m²). La albuminuria de orina de 24h (mg/24h) se usa como proxy del ACR (mg/g); la equivalencia asume creatinuria urinaria ~1 g/día. El resultado es orientativo y debe interpretarse en contexto clínico completo. </p> </div> </div> <div class="actions"> <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">↺ Limpiar</button> <button type="button" class="btn btn-secondary" onclick="document.getElementById('autocarga-panel').style.display=document.getElementById('autocarga-panel').style.display==='none'?'block':'none'" title="Pegar datos de paciente en texto libre para autocompletar el formulario">⚡ Autocarga IA</button> <button type="submit" class="btn btn-primary">+ Guardar Registro</button> </div> <!-- PANEL AUTOCARGA --> <div id="autocarga-panel" style="display:none; margin-top:20px; background:#eaf4fb; border:1.5px solid #aed6f1; border-radius:4px; padding:20px;"> <div style="font-size:0.8rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#1a5276; margin-bottom:10px;">⚡ Autocarga desde texto clínico</div> <p style="font-size:0.82rem; color:#555; margin-bottom:10px;">Pegá acá el JSON que te generó Claude con los datos del paciente y el formulario se completará automáticamente.</p> <textarea id="autocarga-input" style="width:100%; min-height:120px; font-size:0.82rem; font-family:monospace; border:1.5px solid #aed6f1; border-radius:3px; padding:10px;" placeholder='{"hc":"123456","edad":"65","sexo":"Masculino","fecha":"2026-03-13","hospital":"Ramos Mejía","cobertura":"Obra Social","motivo":"Control ERC","erc":true,"hta":true,"creatinina":"2.1","acr":"180",...}'></textarea> <div style="display:flex; gap:10px; margin-top:10px;"> <button type="button" class="btn btn-primary" onclick="autocargaDesdeJSON()" style="padding:9px 20px; font-size:0.82rem;">✓ Autocompletar formulario</button> <button type="button" class="btn btn-secondary" onclick="document.getElementById('autocarga-input').value=''; document.getElementById('autocarga-panel').style.display='none'" style="padding:9px 20px; font-size:0.82rem;">Cancelar</button> </div> <div id="autocarga-msg" style="margin-top:8px; font-size:0.8rem;"></div> </div></form><!-- SEGUIMIENTO LONGITUDINAL -->
-<div id="seguimiento-section">
-  <div class="section-header">
-    <span class="num seg-num">📈</span>
-    <h2>Seguimiento Longitudinal — Curva de Progresión por Paciente</h2>
-  </div>
-  <div class="seg-body">
-    <div class="seg-search-bar">
-      <div style="flex:1;">
-        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;">N° Historia Clínica</label>
-        <input type="text" id="seg-hc-input" placeholder="Ingresá el N° HC para ver el historial del paciente..." onkeydown="if(event.key==='Enter') buscarPaciente()">
-      </div>
-      <button class="btn btn-primary" onclick="buscarPaciente()" style="padding:10px 22px;font-size:0.84rem;">🔍 Buscar</button>
-      <button class="btn btn-secondary" onclick="limpiarSeguimiento()" style="padding:10px 16px;font-size:0.84rem;">✕</button>
-    </div>
-    <div id="seg-resultado"></div>
+
+<!-- SCREEN 2: ESAS-r -->
+<div class="screen" id="screen2">
+  <div class="card">
+    <div class="section-title">ESAS-r</div>
+    <div class="section-intro">El siguiente cuestionario tiene como finalidad evaluar los síntomas de nuestros pacientes para lograr un seguimiento detallado e intervenciones efectivas por parte de su equipo de profesionales de la salud. Repetiremos el cuestionario en cada visita al CERCA.</div>
+    <div class="section-subtitle">Marque el número que describe mejor cómo se siente <strong>AHORA</strong>, en este momento.</div>
+    <div id="esasItems"></div>
   </div>
 </div>
-<!-- PANEL DE ANALYTICS -->
-<div id="analytics-section" style="display:none;">
-  <div class="section-header">
-    <span class="num analytics-num">📊</span>
-    <h2>Panel de Estadísticas — Cohorte</h2>
-  </div>
-  <div class="analytics-body">
-    <!-- KPIs -->
-    <div class="analytics-grid" id="analytics-kpis">
-      <div class="stat-card blue"><div class="stat-val" id="an-total">—</div><div class="stat-label">Pacientes totales</div></div>
-      <div class="stat-card blue"><div class="stat-val" id="an-edad">—</div><div class="stat-label">Edad promedio</div><div class="stat-sub">años</div></div>
-      <div class="stat-card green"><div class="stat-val" id="an-fge">—</div><div class="stat-label">FGe promedio</div><div class="stat-sub">mL/min/1.73m²</div></div>
-      <div class="stat-card blue"><div class="stat-val" id="an-erc-pct">—</div><div class="stat-label">Con ERC</div></div>
-    </div>
-    <!-- Distribución ERC + Comorbilidades -->
-    <div class="analytics-row">
-      <div class="chart-box">
-        <div class="chart-title">📈 Distribución por Estadio ERC (FGe)</div>
-        <div class="bar-chart" id="an-erc-chart"><div style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Cargando...</div></div>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">🫀 Comorbilidades principales</div>
-        <div class="bar-chart" id="an-comorbilidades-chart"><div style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Cargando...</div></div>
-      </div>
-    </div>
-    <!-- Medicación + Alertas -->
-    <div class="analytics-row">
-      <div class="chart-box">
-        <div class="chart-title">💊 Uso de medicación nefroprotectora</div>
-        <div class="bar-chart" id="an-med-chart"><div style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Cargando...</div></div>
-      </div>
-      <div class="alerts-box">
-        <div class="chart-title">🚨 Alertas clínicas activas</div>
-        <div id="an-alertas"><div class="no-alerts">Cargando alertas...</div></div>
-      </div>
-    </div>
-    <div class="analytics-footer" id="an-footer"></div>
+<div class="nav-area" id="nav2" style="display:none">
+  <button class="btn-back" onclick="goTo(1)">← Atrás</button>
+  <button class="btn-next" onclick="goToMMAS()">Continuar →</button>
+</div>
+
+<!-- SCREEN 3: MMAS-8 -->
+<div class="screen" id="screen3">
+  <div class="card">
+    <div class="section-title">Adherencia a la medicación</div>
+    <div class="section-intro">Estimado/a paciente, el siguiente cuestionario permite determinar el grado de "adherencia" a la medicación en una escala conocida como Escala de adherencia a la medicación de Morisky-8 (MMAS-8). Le pedimos que se tome un momento para responder las preguntas con el mayor grado de precisión posible. No existen respuestas incorrectas.<br><br>Se le pedirá que rellene el formulario en varias visitas. Esta herramienta será utilizada para que su equipo de salud pueda mejorar su seguimiento y tratamiento.</div>
+    <div class="section-subtitle">Responda con la mayor precisión posible. No hay respuestas incorrectas.</div>
+    <div id="mmasItems"></div>
   </div>
 </div>
-<!-- BASE DE DATOS --><div id="db-section"> <div class="section-header"> <span class="num" style="color:#5dade2">📋</span> <h2>Base de Datos — Registros Cargados</h2> </div> <div class="db-controls"> <button class="btn btn-excel" onclick="exportarExcel()">⬇ Exportar a Excel (.xlsx)</button>
-      <button class="btn btn-secondary" onclick="toggleAnalytics()" id="btn-analytics" style="font-size:0.82rem;padding:10px 18px;">📊 Ver estadísticas</button>
-      <button class="btn btn-secondary" onclick="toggleSeguimiento()" id="btn-seguimiento" style="font-size:0.82rem;padding:10px 18px;">📈 Seguimiento</button> <label class="btn btn-secondary" style="cursor:pointer;margin:0;"> ⬆ Importar desde Excel <input type="file" id="import-input" accept=".xlsx,.xls" style="display:none" onchange="importarExcel(event)"> </label> <button class="btn btn-secondary" onclick="limpiarBase()" style="font-size:0.78rem;padding:10px 16px;">🗑 Borrar todo</button> <span class="db-count" id="db-count">0 registros</span> </div> <div class="table-wrap" id="table-wrap"> <div class="no-data">Cargando registros...</div> </div></div></div><div id="toast"></div>
-<!-- PDF MODAL -->
-<div id="pdf-modal">
-  <div id="pdf-modal-inner">
-    <div id="pdf-modal-header">
-      <h3>📄 Resumen de Paciente</h3>
-      <button id="pdf-modal-close" onclick="cerrarPDFModal()">✕</button>
-    </div>
-    <div id="pdf-modal-body">
-      <div id="pdf-content"></div>
-    </div>
-    <div id="pdf-modal-actions">
-      <button class="btn btn-secondary" onclick="cerrarPDFModal()">Cerrar</button>
-      <button class="btn btn-pdf" onclick="imprimirPDF()">🖨️ Imprimir / Guardar PDF</button>
+<div class="nav-area" id="nav3" style="display:none">
+  <button class="btn-back" onclick="goTo(2)">← Atrás</button>
+  <button class="btn-next" onclick="submitAll()">Enviar ✓</button>
+</div>
+
+<!-- SCREEN 4: SUCCESS -->
+<div class="screen" id="screen4">
+  <div class="success-screen">
+    <div class="success-icon" id="successIcon">✓</div>
+    <div class="success-title" id="successTitle">¡Muchas gracias!</div>
+    <div class="success-text" id="successText">Sus respuestas fueron registradas correctamente.<br><br>Puede cerrar esta pantalla o entregársela al profesional de salud.</div>
+    <div class="success-offline" id="successOffline">⚠️ No hay conexión en este momento.<br>Sus respuestas están guardadas en el dispositivo y se enviarán automáticamente cuando vuelva la señal.</div>
+    <div class="pdf-section" id="pdfSection" style="display:none">
+      <p id="emailStatus"></p>
+      <button class="btn-pdf" id="btnPdf" onclick="downloadSummary()" style="display:none">📄 Descargar resumen</button>
     </div>
   </div>
 </div>
-<div id="pdf-print-area" style="display:none;"></div>
-</div><!-- /app-content --><script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
-const WORKER_URL = 'https://nefro-proxy.veronicaroatta.workers.dev';
 
-let _dbCache = null;
-let _currentUser = '';
-let _currentRole = '';
+<script>
+// ═══════════════════════════════════════════════════════
+// WORKER URL — aquí apuntamos al Worker de Cloudflare
+// La API Key de Airtable está guardada allá, no acá
+// ═══════════════════════════════════════════════════════
+const WORKER_URL = "https://cerca.veronicaroatta.workers.dev";
 
-// ─── RATE LIMITING (anti-fuerza-bruta) ───────────────────────────────────────
-const _RL_KEY    = 'nefro_rl';
-const _RL_MAX    = 5;
-const _RL_LOCK   = 15 * 60 * 1000; // 15 minutos de bloqueo
+// ── EMAILJS (opcional — completar si querés email automático) ──
+const EMAILJS_PUBLIC_KEY  = "JOu8hD_uLWcVWd00s";
+const EMAILJS_SERVICE_ID  = "service_6sf09b9";
+const EMAILJS_TEMPLATE_ID = "template_r6tjscb";
+const EMAIL_DESTINO       = "nefrologia.hospital.aleman@gmail.com";
 
-function _rlCheck() {
-  try {
-    const raw = localStorage.getItem(_RL_KEY);
-    if (!raw) return { blocked: false, attempts: 0 };
-    const d = JSON.parse(raw);
-    if (d.lockedUntil && Date.now() < d.lockedUntil) {
-      const mins = Math.ceil((d.lockedUntil - Date.now()) / 60000);
-      return { blocked: true, mins };
-    }
-    return { blocked: false, attempts: d.attempts || 0 };
-  } catch(e) { return { blocked: false, attempts: 0 }; }
+// ─── COLA OFFLINE ───────────────────────────────────────
+const QUEUE_KEY = "cerca_submit_queue";
+function getQueue() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); } catch { return []; } }
+function saveQueue(q) { try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch(e) {} }
+function addToQueue(payload) {
+  const q = getQueue();
+  q.push({ payload, timestamp: new Date().toISOString(), attempts: 0 });
+  saveQueue(q);
 }
 
-function _rlFail() {
-  try {
-    const raw = localStorage.getItem(_RL_KEY);
-    const d = raw ? JSON.parse(raw) : { attempts: 0 };
-    d.attempts = (d.attempts || 0) + 1;
-    if (d.attempts >= _RL_MAX) d.lockedUntil = Date.now() + _RL_LOCK;
-    localStorage.setItem(_RL_KEY, JSON.stringify(d));
-    return d.attempts;
-  } catch(e) { return 0; }
-}
-
-function _rlReset() {
-  try { localStorage.removeItem(_RL_KEY); } catch(e) {}
-}
-
-// ─── TIMEOUT DE SESIÓN POR INACTIVIDAD ───────────────────────────────────────
-const _TIMEOUT_WARN = 25 * 60 * 1000; // aviso a los 25 min
-const _TIMEOUT_KICK = 30 * 60 * 1000; // cierre a los 30 min
-let _timerWarn = null;
-let _timerKick = null;
-
-function _resetSessionTimer() {
-  if (!getToken()) return;
-  clearTimeout(_timerWarn);
-  clearTimeout(_timerKick);
-  _timerWarn = setTimeout(() => {
-    mostrarToast('⚠️ Tu sesión expira en 5 minutos por inactividad.', 'error');
-  }, _TIMEOUT_WARN);
-  _timerKick = setTimeout(() => {
-    sessionStorage.removeItem('nefroToken');
-    mostrarToast('🔒 Sesión cerrada automáticamente por inactividad.', 'error');
-    setTimeout(() => location.reload(), 2500);
-  }, _TIMEOUT_KICK);
-}
-
-function _initSessionTimeout() {
-  ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(ev =>
-    document.addEventListener(ev, _resetSessionTimer, { passive: true })
-  );
-  _resetSessionTimer();
-}
-
-// ─── CIFRADO DE N° HC (AES-256-GCM + PBKDF2) ─────────────────────────────────
-let _cryptoKey = null;
-
-async function _deriveKey(password) {
-  const enc    = new TextEncoder();
-  const keyMat = await crypto.subtle.importKey(
-    'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
-  );
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('nefro-hc-v1'), iterations: 600000, hash: 'SHA-256' },
-    keyMat, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
-}
-
-async function encryptHC(hc) {
-  if (!hc || !_cryptoKey) return hc;
-  try {
-    const enc = new TextEncoder();
-    const iv  = crypto.getRandomValues(new Uint8Array(12));
-    const ct  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, _cryptoKey, enc.encode(String(hc)));
-    const buf = new Uint8Array(12 + ct.byteLength);
-    buf.set(iv);
-    buf.set(new Uint8Array(ct), 12);
-    return btoa(String.fromCharCode(...buf));
-  } catch(e) { return hc; }
-}
-
-async function decryptHC(ciphertext) {
-  if (!ciphertext || !_cryptoKey) return '🔒';
-  try {
-    const buf = new Uint8Array(atob(ciphertext).split('').map(c => c.charCodeAt(0)));
-    const pt  = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0,12) }, _cryptoKey, buf.slice(12));
-    return new TextDecoder().decode(pt);
-  } catch(e) { return '🔒'; }
-}
-
-// ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────
-function getToken() { return sessionStorage.getItem('nefroToken') || ''; }
-function getUser()  { return sessionStorage.getItem('nefroUser') || ''; }
-function getRole()  { return sessionStorage.getItem('nefroRole') || ''; }
-function authHdr()  { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }; }
-
-function mostrarLogin(visible) {
-  document.getElementById('login-overlay').style.display = visible ? 'flex' : 'none';
-  document.getElementById('app-content').style.display  = visible ? 'none'  : 'block';
-}
-
-function aplicarRol(role) {
-  _currentRole = role;
-  // Elementos que solo ve el admin
-  const adminOnly = ['btn-analytics', 'btn-seguimiento'];
-  const dbSection = document.getElementById('db-section');
-
-  if (role === 'registro') {
-    // Ocultar sección de base de datos completa
-    if (dbSection) dbSection.style.display = 'none';
+function updatePendingBanner() {
+  const q = getQueue();
+  const banner = document.getElementById("pendingBanner");
+  if (q.length > 0) {
+    banner.textContent = `📤 ${q.length} respuesta${q.length > 1 ? "s" : ""} pendiente${q.length > 1 ? "s" : ""} de envío — Tocá para intentar ahora`;
+    banner.classList.add("show");
   } else {
-    if (dbSection) dbSection.style.display = '';
-  }
-
-  // Mostrar nombre de usuario en header
-  const userDisplay = document.getElementById('user-display');
-  if (userDisplay) {
-    userDisplay.textContent = _currentUser || '';
-    userDisplay.style.display = _currentUser ? '' : 'none';
+    banner.classList.remove("show");
   }
 }
 
-async function intentarLogin() {
-  const errEl = document.getElementById('login-error');
-
-  // Verificar bloqueo por intentos fallidos
-  const rl = _rlCheck();
-  if (rl.blocked) {
-    errEl.textContent = `🔒 Demasiados intentos fallidos. Esperá ${rl.mins} minuto${rl.mins !== 1 ? 's' : ''}.`;
-    return;
-  }
-
-  const user  = (document.getElementById('login-user').value || '').trim();
-  const pass  = document.getElementById('login-password').value.trim();
-  if (!user) { errEl.textContent = 'Ingresá tu nombre de usuario.'; return; }
-  if (!pass) { errEl.textContent = 'Ingresá la contraseña.'; return; }
-  errEl.textContent = '';
-  document.getElementById('login-btn').textContent = 'Verificando...';
-  try {
-    const token = user + ':' + pass;
-    sessionStorage.setItem('nefroToken', token);
-    sessionStorage.setItem('nefroUser', user);
-    const r = await fetch(WORKER_URL + '?action=whoami', { headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } });
-    if (r.status === 401) {
-      sessionStorage.removeItem('nefroToken');
-      sessionStorage.removeItem('nefroUser');
-      sessionStorage.removeItem('nefroRole');
-      const attempts = _rlFail();
-      const remaining = _RL_MAX - attempts;
-      errEl.textContent = remaining > 0
-        ? `❌ Usuario o contraseña incorrectos. ${remaining} intento${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}.`
-        : `🔒 Cuenta bloqueada por ${_RL_LOCK / 60000} minutos por exceso de intentos.`;
-      document.getElementById('login-btn').textContent = 'Ingresar';
-      return;
-    }
-    const whoami = await r.json();
-    const role = whoami.role || 'registro';
-    sessionStorage.setItem('nefroRole', role);
-    _currentUser = user;
-    _currentRole = role;
-    _rlReset();
-    _cryptoKey = await _deriveKey(pass);
-    mostrarLogin(false);
-    aplicarRol(role);
-    _initSessionTimeout();
-    await renderTabla();
-    mostrarToast(`✓ Bienvenido/a, ${user}.`, 'success');
-  } catch(e) {
-    errEl.textContent = '⚠️ Error de conexión. Verificá tu internet.';
-    document.getElementById('login-btn').textContent = 'Ingresar';
-  }
-}
-
-function cerrarSesion() {
-  if (!confirm('¿Cerrar sesión?')) return;
-  sessionStorage.removeItem('nefroToken');
-  sessionStorage.removeItem('nefroUser');
-  sessionStorage.removeItem('nefroRole');
-  _currentUser = '';
-  _currentRole = '';
-  location.reload();
-}
-
-// ─── FUNCIONES DE BASE DE DATOS ──────────────────────────────────────────────
-async function cargarDB() {
-  try {
-    const r = await fetch(WORKER_URL, { headers: authHdr() });
-    if (r.status === 401) { mostrarLogin(true); return []; }
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const raw = await r.json();
-    _dbCache = raw;
-    return raw.map(({ _airtableId, ...fields }) => fields);
-  } catch(e) {
-    console.error('Error cargando DB:', e);
-    mostrarToast('⚠️ Error al cargar los datos. Revisá tu conexión.', 'error');
-    if (_dbCache) return _dbCache.map(({ _airtableId, ...fields }) => fields);
-    return [];
-  }
-}
-
-async function agregarRegistro(registro) {
-  const r = await fetch(WORKER_URL, { method: 'POST', headers: authHdr(), body: JSON.stringify(registro) });
-  if (r.status === 401) { mostrarLogin(true); throw new Error('Sesión expirada'); }
-  if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(JSON.stringify(err)); }
-  _dbCache = null;
-}
-
-async function agregarMultiples(registros) {
-  if (!registros.length) return;
-  const r = await fetch(WORKER_URL, { method: 'POST', headers: authHdr(), body: JSON.stringify(registros) });
-  if (r.status === 401) { mostrarLogin(true); throw new Error('Sesión expirada'); }
-  if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(JSON.stringify(err)); }
-  _dbCache = null;
-}
-
-async function eliminarTodos() {
-  const r = await fetch(WORKER_URL, { method: 'DELETE', headers: authHdr() });
-  if (r.status === 401) { mostrarLogin(true); throw new Error('Sesión expirada'); }
-  if (!r.ok) throw new Error('Error al eliminar registros: HTTP ' + r.status);
-  _dbCache = null;
-}
-
-// ─── CKD-EPI 2021 ─────────────────────────────────────────────────────────
-function calcularCKDEPI(scr, edad, sexo) {
-  if (!scr || !edad || !sexo) return null;
-  scr = parseFloat(scr); edad = parseInt(edad);
-  const isFem = sexo === 'Femenino';
-  const kappa = isFem ? 0.7 : 0.9;
-  const alpha = isFem ? -0.241 : -0.302;
-  const sexFactor = isFem ? 1.012 : 1.0;
-  const ratio = scr / kappa;
-  const fge = ratio < 1
-    ? 142 * Math.pow(ratio, alpha) * Math.pow(0.9938, edad) * sexFactor
-    : 142 * Math.pow(ratio, -1.200) * Math.pow(0.9938, edad) * sexFactor;
-  return Math.round(fge * 10) / 10;
-}
-
-function estadioFGe(v) {
-  if (v >= 90) return { cls: 'g1', txt: 'G1 ≥90' };
-  if (v >= 60) return { cls: 'g2', txt: 'G2 60–89' };
-  if (v >= 45) return { cls: 'g3a', txt: 'G3a 45–59' };
-  if (v >= 30) return { cls: 'g3b', txt: 'G3b 30–44' };
-  if (v >= 15) return { cls: 'g4', txt: 'G4 15–29' };
-  return { cls: 'g5', txt: 'G5 <15' };
-}
-
-function estadioKDIGO(v) {
-  if (v >= 90) return 'G1 — ≥90 mL/min';
-  if (v >= 60) return 'G2 — 60–89 mL/min';
-  if (v >= 45) return 'G3a — 45–59 mL/min';
-  if (v >= 30) return 'G3b — 30–44 mL/min';
-  if (v >= 15) return 'G4 — 15–29 mL/min';
-  return 'G5 — <15 mL/min';
-}
-
-function actualizarFGe() {
-  const scr = document.getElementById('creatinina').value;
-  const edad = document.getElementById('edad').value;
-  const sexo = document.getElementById('sexo').value;
-  const inputFge = document.getElementById('fge');
-  const badge = document.getElementById('fge-badge');
-  const estadioDiv = document.getElementById('estadio-erc-display');
-  if (scr && edad && sexo) {
-    const v = calcularCKDEPI(scr, edad, sexo);
-    if (v && v > 0) {
-      inputFge.value = v;
-      const e = estadioFGe(v);
-      badge.className = 'fge-badge ' + e.cls + ' show';
-      badge.textContent = 'Estadio ' + e.txt;
-      estadioDiv.textContent = estadioKDIGO(v);
-      actualizarKFRE();
-      return;
-    }
-  }
-  inputFge.value = '';
-  badge.className = 'fge-badge';
-  badge.textContent = '';
-  estadioDiv.textContent = '— Ingresá el FGe en Laboratorio —';
-  actualizarKFRE();
-}
-
-['creatinina', 'edad', 'sexo'].forEach(id => {
-  document.getElementById(id).addEventListener('input', actualizarFGe);
-  document.getElementById(id).addEventListener('change', actualizarFGe);
-});
-
-// ─── IMC ──────────────────────────────────────────────────────────────────
-function actualizarIMC() {
-  const peso = parseFloat(document.getElementById('peso').value);
-  const talla = parseFloat(document.getElementById('talla').value);
-  const inputIMC = document.getElementById('imc');
-  const badge = document.getElementById('imc-badge');
-  if (peso && talla && talla > 0) {
-    const tallam = talla / 100;
-    const imc = Math.round((peso / (tallam * tallam)) * 10) / 10;
-    inputIMC.value = imc;
-    let cls, txt;
-    if (imc < 18.5)      { cls = 'g2';  txt = 'Bajo peso'; }
-    else if (imc < 25)   { cls = 'g1';  txt = 'Normopeso'; }
-    else if (imc < 30)   { cls = 'g3a'; txt = 'Sobrepeso'; }
-    else if (imc < 35)   { cls = 'g3b'; txt = 'Obesidad I'; }
-    else if (imc < 40)   { cls = 'g4';  txt = 'Obesidad II'; }
-    else                 { cls = 'g5';  txt = 'Obesidad III'; }
-    badge.className = 'fge-badge ' + cls + ' show';
-    badge.textContent = txt;
-  } else {
-    inputIMC.value = '';
-    badge.className = 'fge-badge';
-    badge.textContent = '';
-  }
-}
-
-['peso', 'talla'].forEach(id => {
-  document.getElementById(id).addEventListener('input', actualizarIMC);
-});
-
-// ─── ERC CONDICIONAL ───────────────────────────────────────────────────────
-document.getElementById('erc').addEventListener('change', function () {
-  document.getElementById('erc-extra-group').classList.toggle('active', this.checked);
-  if (!this.checked) {
-    document.getElementById('tiempo-erc').value = '';
-    document.getElementById('tiempo-erc').disabled = false;
-    document.getElementById('tiempo-desconocido').checked = false;
-  }
-  actualizarKFRE();
-});
-
-function toggleTiempoERC() {
-  const desconocido = document.getElementById('tiempo-desconocido').checked;
-  const input = document.getElementById('tiempo-erc');
-  input.disabled = desconocido;
-  if (desconocido) input.value = '';
-}
-
-// ─── BIOPSIA CONDICIONAL ───────────────────────────────────────────────────
-document.querySelectorAll('input[name="biopsia"]').forEach(r => {
-  r.addEventListener('change', () => {
-    document.getElementById('biopsia-resultado-group')
-      .classList.toggle('active', r.value === 'Sí' && r.checked);
+// ─── ENVÍO AL WORKER ────────────────────────────────────
+async function submitToWorker(fields) {
+  const res = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields)
   });
-});
+  if (!res.ok) throw new Error("Error " + res.status);
+  return res.json();
+}
 
-document.querySelectorAll('input[name="aki"]').forEach(r => {
-  r.addEventListener('change', () => {
-    const grp = document.getElementById('aki-causal-group');
-    const isYes = r.value === 'Sí' && r.checked;
-    grp.style.opacity = isYes ? '1' : '0.3';
-    grp.style.pointerEvents = isYes ? 'auto' : 'none';
-    if (!isYes) document.getElementById('aki-causal').value = '';
+async function flushQueue() {
+  const q = getQueue();
+  if (q.length === 0) return;
+  const remaining = [];
+  for (const item of q) {
+    try { await submitToWorker(item.payload); }
+    catch(e) { item.attempts = (item.attempts || 0) + 1; remaining.push(item); }
+  }
+  saveQueue(remaining);
+  updatePendingBanner();
+  if (remaining.length < q.length) {
+    const sent = q.length - remaining.length;
+    showToast(`✓ ${sent} respuesta${sent > 1 ? "s" : ""} enviada${sent > 1 ? "s" : ""}`);
+  }
+}
+
+// ─── DATOS DE LOS FORMULARIOS ───────────────────────────
+const esasItems = [
+  { id: "dolor",       left: "Nada de dolor",                        right: "El peor dolor que se pueda imaginar" },
+  { id: "cansancio",   left: "Nada agotado (cansancio)",              right: "Lo más agotado que se pueda imaginar" },
+  { id: "somnolencia", left: "Nada somnoliento (adormilado)",         right: "Lo más somnoliento que se pueda imaginar" },
+  { id: "nauseas",     left: "Sin náuseas",                           right: "Las peores náuseas que se pueda imaginar" },
+  { id: "apetito",     left: "Ninguna pérdida de apetito",            right: "El peor apetito que se pueda imaginar" },
+  { id: "respiracion", left: "Ninguna dificultad para respirar",      right: "La mayor dificultad para respirar que se pueda imaginar" },
+  { id: "animo",       left: "Nada desanimado",                       right: "Lo más desanimado que se pueda imaginar" },
+  { id: "ansiedad",    left: "Nada nervioso (ansiedad)",              right: "Lo más nervioso que se pueda imaginar" },
+  { id: "sueno",       left: "Duermo perfectamente",                  right: "La mayor dificultad para dormir que se pueda imaginar" },
+  { id: "bienestar",   left: "Sintiéndome perfectamente (bienestar)", right: "Sintiéndome lo peor que se pueda imaginar" },
+  { id: "otro",        left: "Otro problema",                         right: "Lo peor posible", isOtro: true },
+];
+
+const mmasItems = [
+  { id: "q1", q: "¿A veces se olvida de tomar su medicación?" },
+  { id: "q2", q: "Pensando en las últimas dos semanas, ¿hubo algún día en el que no recibió su medicación?", note: "La gente a veces no toma su medicación por situaciones ajenas a la memoria." },
+  { id: "q3", q: "¿Alguna vez suspendió medicación o disminuyó dosis sin contarle a su médico porque la droga lo hizo sentir \"peor\"?" },
+  { id: "q4", q: "¿Se olvida de llevar su medicación cuando viaja o sale de su casa?" },
+  { id: "q5", q: "¿Recibió la última dosis correspondiente de su medicación?" },
+  { id: "q6", q: "¿Deja de tomar su medicación cuando cree que los síntomas o la enfermedad están bajo control?" },
+  { id: "q7", q: "¿En algún momento se siente fastidiado por el hecho de tener que cumplir con las indicaciones?", note: "Tomar medicamentos diariamente puede ser inconveniente para muchas personas." },
+];
+
+const mmasFreqOpts = [
+  { val: 1,    label: "Nunca / casi nunca" },
+  { val: 0.75, label: "Rara vez" },
+  { val: 0.5,  label: "Algunas veces" },
+  { val: 0.25, label: "Habitualmente" },
+  { val: 0,    label: "Siempre" },
+];
+
+const state = { dni: "", esas: {}, esasOtroNombre: "", mmas: {}, mmasFreq: null };
+let lastSubmittedFields = null;
+
+// ─── BUILD ESAS ─────────────────────────────────────────
+function buildESAS() {
+  const container = document.getElementById("esasItems");
+  container.innerHTML = "";
+  esasItems.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "esas-item";
+    let html = `<div class="esas-labels"><div class="esas-label-left">${item.left}</div><div class="esas-label-right">${item.right}</div></div>`;
+    if (item.isOtro) html += `<div class="otro-field"><input type="text" class="otro-input" id="otroNombre" placeholder="¿Cuál síntoma? (ej: sequedad de boca)" maxlength="50"></div>`;
+    html += `<div class="esas-scale">`;
+    for (let v = 0; v <= 10; v++) html += `<button class="esas-btn" data-id="${item.id}" data-val="${v}" onclick="selectESAS('${item.id}',${v},this)">${v}</button>`;
+    html += `</div><div class="esas-selected-val" id="esasVal_${item.id}"></div>`;
+    div.innerHTML = html;
+    container.appendChild(div);
   });
-});
-
-document.querySelectorAll('input[name="dialisis"]').forEach(r => {
-  r.addEventListener('change', () => {
-    const grp = document.getElementById('fecha-dialisis-group');
-    const isYes = r.value === 'Sí' && r.checked;
-    grp.style.opacity = isYes ? '1' : '0.3';
-    grp.style.pointerEvents = isYes ? 'auto' : 'none';
-    if (!isYes) document.getElementById('fecha-dialisis').value = '';
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// KFRE — Kidney Failure Risk Equation (Tangri et al., JAMA 2011)
-// ═══════════════════════════════════════════════════════════════════
-function calcularKFRE(edad, sexo, fge, acr) {
-  edad = parseFloat(edad); fge = parseFloat(fge); acr = parseFloat(acr);
-  if (isNaN(edad) || isNaN(fge) || isNaN(acr) || !sexo) return null;
-  if (acr <= 0 || fge <= 0) return null;
-  const sexMale = (sexo === 'Masculino') ? 1 : 0;
-  const lp = -0.2201 * (edad / 10 - 7.036)
-           +  0.2467 * (sexMale - 0.5642)
-           -  0.5567 * (fge / 5 - 7.222)
-           +  0.4510 * (Math.log(acr) - 5.137);
-  const expLP = Math.exp(lp);
-  const risk2y = (1 - Math.pow(0.9832, expLP)) * 100;
-  const risk5y = (1 - Math.pow(0.9365, expLP)) * 100;
-  return {
-    risk2y: Math.round(Math.min(99.9, Math.max(0.1, risk2y)) * 10) / 10,
-    risk5y: Math.round(Math.min(99.9, Math.max(0.1, risk5y)) * 10) / 10,
-  };
 }
 
-function kfreCategoria(risk5y) {
-  if (risk5y < 5)  return { cls: 'kfre-low',       catCls: 'kfre-cat-low',       txt: '🟢 Bajo',     desc: 'Bajo — <5% a 5 años' };
-  if (risk5y < 20) return { cls: 'kfre-moderate',   catCls: 'kfre-cat-moderate',   txt: '🟡 Moderado', desc: 'Moderado — 5–20% a 5 años' };
-  if (risk5y < 40) return { cls: 'kfre-high',       catCls: 'kfre-cat-high',       txt: '🟠 Alto',     desc: 'Alto — 20–40% a 5 años' };
-  return             { cls: 'kfre-very-high',  catCls: 'kfre-cat-very-high',  txt: '🔴 Muy Alto', desc: 'Muy alto — ≥40% a 5 años' };
+function selectESAS(id, val, btn) {
+  document.querySelectorAll(`.esas-btn[data-id="${id}"]`).forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  state.esas[id] = val;
+  const label = document.getElementById(`esasVal_${id}`);
+  if (label) label.textContent = val === 0 ? "Sin síntoma" : val <= 3 ? "Leve" : val <= 6 ? "Moderado" : "Severo";
+  const filled = Object.keys(state.esas).length;
+  document.getElementById("progressFill").style.width = (Math.round((filled / esasItems.length) * 50) + 33) + "%";
 }
 
-function actualizarKFRE() {
-  const ercChecked = document.getElementById('erc').checked;
-  const section = document.getElementById('kfre-section');
-  section.style.display = ercChecked ? 'block' : 'none';
-  if (!ercChecked) return;
-
-  const edad = document.getElementById('edad').value;
-  const sexo = document.getElementById('sexo').value;
-  const fge  = document.getElementById('fge').value;
-  const acr  = document.getElementById('albuminuria').value;
-
-  const summary = document.getElementById('kfre-vars-summary');
-  const partes = [];
-  if (edad) partes.push(`Edad: <strong>${edad}</strong> años`);
-  if (sexo) partes.push(`Sexo: <strong>${sexo}</strong>`);
-  if (fge)  partes.push(`FGe: <strong>${fge}</strong> mL/min`);
-  if (acr)  partes.push(`Albuminuria: <strong>${acr}</strong> mg/24h`);
-  summary.innerHTML = partes.length ? partes.join(' &nbsp;·&nbsp; ') : '— Completá los datos del paciente y el ACR —';
-
-  const content = document.getElementById('kfre-content');
-  const result = calcularKFRE(edad, sexo, fge, acr);
-  if (!result) {
-    content.innerHTML = `<div class="kfre-pending-msg">Ingresá la albuminuria (Sección 5) y completá edad, sexo y creatinina para ver el score KFRE.</div>`;
-    return;
-  }
-
-  const cat = kfreCategoria(result.risk5y);
-  const r2 = result.risk2y.toFixed(1);
-  const r5 = result.risk5y.toFixed(1);
-  const fgeNum = parseFloat(fge);
-  let warningHTML = '';
-  if (fgeNum >= 60) {
-    warningHTML = `<div class="kfre-warning-badge">⚠ El KFRE fue validado para FGe 15–59 (G3–G5). Interpretá con cautela en G1–G2.</div>`;
-  } else if (fgeNum < 15) {
-    warningHTML = `<div class="kfre-warning-badge">⚠ FGe &lt;15 (G5): el paciente puede estar próximo a inicio de terapia de reemplazo renal.</div>`;
-  }
-
-  content.innerHTML = `
-    <div class="kfre-results-grid">
-      <div class="kfre-result-box">
-        <div class="kfre-result-box-label">Riesgo a 2 años</div>
-        <div class="kfre-result-box-value ${cat.cls}">${r2}<span class="kfre-pct">%</span></div>
-        <div class="kfre-result-box-unit">probabilidad de<br>falla renal terminal</div>
-      </div>
-      <div class="kfre-result-box">
-        <div class="kfre-result-box-label">Riesgo a 5 años</div>
-        <div class="kfre-result-box-value ${cat.cls}">${r5}<span class="kfre-pct">%</span></div>
-        <div class="kfre-result-box-unit">probabilidad de<br>falla renal terminal</div>
-      </div>
-      <div class="kfre-result-box">
-        <div class="kfre-result-box-label">Categoría de riesgo</div>
-        <div style="margin-top:14px;">
-          <span class="kfre-category-badge ${cat.catCls}">${cat.txt}</span>
-        </div>
-        <div class="kfre-result-box-unit" style="margin-top:10px;">${cat.desc}</div>
-      </div>
-    </div>
-    ${warningHTML}
-    <div class="kfre-footer-note">
-      Modelo KFRE 4 variables · Edad: ${edad}a · Sexo: ${sexo} · FGe: ${fge} mL/min · Albuminuria: ${acr} mg/24h (proxy ACR) · Tangri N et al. <em>JAMA</em> 2011;305(15):1553-9. El resultado es orientativo y no reemplaza el criterio clínico.
-    </div>`;
-}
-
-document.getElementById('albuminuria').addEventListener('input', () => {
-  actualizarKFRE();
-  actualizarAlbuminuriaKDIGO();
-});
-
-function actualizarAlbuminuriaKDIGO() {
-  const val = parseFloat(document.getElementById('albuminuria').value);
-  const badge = document.getElementById('alb-badge');
-  if (isNaN(val) || val < 0) { badge.className = 'fge-badge'; badge.textContent = ''; return; }
-  // Albuminuria 24h como proxy ACR (asume creatinuria ~1g/día)
-  // A1: <30 mg/24h, A2: 30-300, A3: >300
-  let cls, txt;
-  if (val < 30)       { cls = 'g1';  txt = 'A1 — Normal (<30 mg/24h)'; }
-  else if (val <= 300){ cls = 'g3a'; txt = 'A2 — Moderada (30–300 mg/24h)'; }
-  else                { cls = 'g4';  txt = 'A3 — Severa (>300 mg/24h)'; }
-  badge.className = 'fge-badge ' + cls + ' show';
-  badge.textContent = txt;
-}
-
-// ─── GUARDAR NUEVO REGISTRO ───────────────────────────────────────────────
-document.getElementById('main-form').addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  const getVal   = id => (document.getElementById(id).value || '').trim();
-  const getCheck = id => document.getElementById(id).checked ? 'Sí' : 'No';
-  const getRadio = name => {
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    return el ? el.value : 'No';
-  };
-
-  if (!getVal('hc') || !getVal('edad') || !getVal('sexo') || !getVal('fecha')) {
-    mostrarToast('Completá los campos obligatorios: HC, edad, sexo y fecha.', 'error');
-    return;
-  }
-
-  mostrarToast('Guardando...', '');
-
-  const ercTildado       = document.getElementById('erc').checked;
-  const tiempoDesconocido = document.getElementById('tiempo-desconocido').checked;
-  const tiempoERC        = ercTildado ? (tiempoDesconocido ? '' : getVal('tiempo-erc')) : '';
-  const estadioERC       = ercTildado ? document.getElementById('estadio-erc-display').textContent : '';
-
-  const albVal = getVal('albuminuria');
-  let kfre2y = '', kfre5y = '', kfrecat = '';
-  if (ercTildado && albVal) {
-    const kr = calcularKFRE(getVal('edad'), getVal('sexo'), getVal('fge'), albVal);
-    if (kr) {
-      kfre2y  = kr.risk2y + '%';
-      kfre5y  = kr.risk5y + '%';
-      kfrecat = kfreCategoria(kr.risk5y).txt.replace(/🟢|🟡|🟠|🔴/g, '').trim();
-    }
-  }
-
-  const registro = {
-    'N° HC':                 await encryptHC(getVal('hc')),
-    'Edad':                  getVal('edad'),
-    'Sexo':                  getVal('sexo'),
-    'Fecha':                 getVal('fecha'),
-    'Hospital':              getVal('hospital'),
-    'Cobertura':             getVal('cobertura'),
-    'Motivo':                getVal('motivo'),
-    'ERC':                   getCheck('erc'),
-    'Estadio ERC (KDIGO)':   estadioERC,
-    'Tiempo ERC (años)':     tiempoERC,
-    'E.Coronaria':           getCheck('coronaria'),
-    'IC':                    getCheck('ic'),
-    'HTA':                   getCheck('hta'),
-    'Tabaquismo':            getCheck('tabaquismo'),
-    'EVP':                   getCheck('evp'),
-    'DBT':                   getCheck('dbt'),
-    'Oncológica':            getCheck('oncologica'),
-    'Autoinmune':            getCheck('autoinmune'),
-    'Litiasis':              getCheck('litiasis'),
-    'ITU':                   getCheck('itu'),
-    'HIV':                   getCheck('hiv'),
-    'Peso (kg)':             getVal('peso'),
-    'Talla (cm)':            getVal('talla'),
-    'IMC (kg/m2)':           getVal('imc'),
-    'Categoría IMC':         document.getElementById('imc-badge').textContent,
-    'TAS (mmHg)':            getVal('tas'),
-    'TAD (mmHg)':            getVal('tad'),
-    'Edemas':                getRadio('edemas'),
-    'Urea (mg/dL)':          getVal('urea') || null,
-    'Creat (mg/dL)':         getVal('creatinina') || null,
-    'FGe CKD-EPI':           getVal('fge') || null,
-    'Proteinuria (mg/24h)':  getVal('proteinuria') || null,
-    'Albuminuria (mg/24h)':  getVal('albuminuria') || null,
-    'KFRE Riesgo 2a':        kfre2y,
-    'KFRE Riesgo 5a':        kfre5y,
-    'KFRE Categoría':        kfrecat,
-    'Hb (g/dL)':             getVal('hb'),
-    'K (mEq/L)':             getVal('potasio'),
-    'PTH (pg/mL)':           getVal('pth'),
-    'Biopsia':               getRadio('biopsia'),
-    'Resultado biopsia':     document.getElementById('biopsia-resultado-group').classList.contains('active') ? getVal('biopsia-resultado') : '',
-    'AKI/AKD':               getRadio('aki'),
-    'Diálisis':              getRadio('dialisis'),
-    'Internación':           getRadio('internacion'),
-    'IECA/ARAII':            getCheck('ieca'),
-    'BB':                    getCheck('bb'),
-    'iSGLT2':                getCheck('isglt2'),
-    'MRA':                   getCheck('mra'),
-    'Inmunosupresión':       getCheck('inmunosupresion'),
-    'EPO':                   getCheck('epo'),
-    'Estatinas':             getCheck('estatinas'),
-    'Diuréticos':            getCheck('diureticos'),
-    'AAS/Antiagregantes':    getCheck('aas'),
-    'Quelantes/Vit D':       getCheck('quelantes'),
-    'Evento CV (IAM/ACV)':   getCheck('evento-cv'),
-    'Monorreno':             getCheck('monorreno'),
-    'Dislipemia':            getCheck('dislipemia'),
-    'Poliquistosis':         getCheck('poliquistosis'),
-    'AINEs/Nefrotóxico':     getCheck('aines'),
-    'Uropatía Obstructiva':  getCheck('uropatia'),
-    'HCO3 (mEq/L)':          getVal('hco3') || null,
-    'Ácido Úrico (mg/dL)':   getVal('acido-urico') || null,
-    'Ferritina (ng/mL)':     getVal('ferritina') || null,
-    'LDL (mg/dL)':           getVal('ldl') || null,
-    'Calcio (mg/dL)':        getVal('calcio') || null,
-    'Fósforo (mg/dL)':       getVal('fosforo') || null,
-    'Glucemia (mg/dL)':      getVal('glucemia') || null,
-    'MACE':                  getRadio('mace'),
-    'Óbito':                 getRadio('obito'),
-    'Fecha Inicio Diálisis': getVal('fecha-dialisis') || null,
-    'AKI Causa Sospechada':  getVal('aki-causal') || null,
-    'AKI Previo (Antec.)':   getCheck('aki-previo'),
-    'Glomerulopatía (Antec.)': getCheck('glomerulopatia'),
-    'HbA1c (%)':             getVal('hba1c') || null,
-    'Sodio (mEq/L)':         getVal('sodio') || null,
-    'Cloro (mEq/L)':         getVal('cloro') || null,
-    'Albuminuria KDIGO':     document.getElementById('alb-badge').textContent || null,
-  };
-
-  try {
-    await agregarRegistro(registro);
-    await renderTabla();
-    if (_analyticsVisible) await renderAnalytics();
-    limpiarFormulario();
-    mostrarToast('✓ Registro guardado correctamente.', 'success');
-  } catch (err) {
-    console.error(err);
-    mostrarToast('⚠️ Error al guardar. Revisá la consola para más detalles.', 'error');
-  }
-});
-
-// ─── TABLA ─────────────────────────────────────────────────────────────────
-async function renderTabla() {
-  const db = await cargarDB();
-  const n = db.length;
-  document.getElementById('db-count').textContent = n + ' registro' + (n !== 1 ? 's' : '');
-  const wrap = document.getElementById('table-wrap');
-  wrap.innerHTML = n
-    ? `<div class="no-data" style="padding:24px; color:var(--muted);">🔒 ${n} registro${n !== 1 ? 's' : ''} almacenado${n !== 1 ? 's' : ''} de forma segura. Exportá a Excel para consultar los datos.</div>`
-    : '<div class="no-data">Aún no hay registros cargados.</div>';
-}
-
-// ─── EXPORTAR EXCEL ────────────────────────────────────────────────────────
-async function exportarExcel() {
-  const db = await cargarDB();
-  if (!db.length) { mostrarToast('No hay registros para exportar.', 'error'); return; }
-  // Descifrar N° HC antes de exportar
-  const dbExport = await Promise.all(db.map(async row => {
-    const r = { ...row };
-    if (r['N° HC']) r['N° HC'] = await decryptHC(r['N° HC']);
-    return r;
-  }));
-  const ws = XLSX.utils.json_to_sheet(dbExport);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
-  ws['!cols'] = Object.keys(dbExport[0]).map(k => ({ wch: Math.max(k.length, 12) }));
-  XLSX.writeFile(wb, `registro_nefrologia_${new Date().toISOString().slice(0, 10)}.xlsx`);
-  mostrarToast('📥 Excel exportado correctamente.', 'success');
-}
-
-// ─── IMPORTAR EXCEL ────────────────────────────────────────────────────────
-function importarExcel(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async function (e) {
-    try {
-      const wb   = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-      if (!rows.length) { mostrarToast('El archivo está vacío.', 'error'); return; }
-
-      mostrarToast('Verificando duplicados...', '');
-      const dbActual = await cargarDB();
-      // Descifrar HCs almacenados para poder comparar con los del Excel (texto plano)
-      const dbDesc = await Promise.all(dbActual.map(async r => ({
-        ...r, 'N° HC': await decryptHC(r['N° HC'])
-      })));
-      const nuevos = rows.filter(row =>
-        !dbDesc.some(r =>
-          r['N° HC'] === String(row['N° HC']).trim() && r['Fecha'] === String(row['Fecha'])
-        )
-      );
-      const duplicados = rows.length - nuevos.length;
-
-      if (nuevos.length > 0) {
-        // Cifrar HCs antes de guardar en Airtable
-        const nuevosEnc = await Promise.all(nuevos.map(async row => ({
-          ...row, 'N° HC': await encryptHC(String(row['N° HC']).trim())
-        })));
-        await agregarMultiples(nuevosEnc);
-      }
-
-      await renderTabla();
-      mostrarToast(
-        `✓ ${nuevos.length} registros nuevos importados` +
-        (duplicados > 0 ? ` (${duplicados} duplicados omitidos)` : '') + '.',
-        'success'
-      );
-    } catch (err) {
-      console.error(err);
-      mostrarToast('Error al leer el archivo. Importá un Excel exportado desde esta página.', 'error');
-    }
-    event.target.value = '';
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-// ─── LIMPIAR FORMULARIO ────────────────────────────────────────────────────
-function limpiarFormulario() {
-  document.getElementById('main-form').reset();
-  document.getElementById('fge').value = '';
-  document.getElementById('fge-badge').className = 'fge-badge';
-  document.getElementById('fge-badge').textContent = '';
-  document.getElementById('estadio-erc-display').textContent = '— Ingresá el FGe en Laboratorio —';
-  document.getElementById('imc').value = '';
-  document.getElementById('imc-badge').className = 'fge-badge';
-  document.getElementById('imc-badge').textContent = '';
-  document.getElementById('biopsia-resultado-group').classList.remove('active');
-  document.getElementById('erc-extra-group').classList.remove('active');
-  document.getElementById('tiempo-erc').disabled = false;
-  document.getElementById('fecha').valueAsDate = new Date();
-  document.getElementById('kfre-section').style.display = 'none';
-  document.getElementById('fecha-dialisis-group').style.opacity = '0.3';
-  document.getElementById('fecha-dialisis-group').style.pointerEvents = 'none';
-  document.getElementById('aki-causal-group').style.opacity = '0.3';
-  document.getElementById('aki-causal-group').style.pointerEvents = 'none';
-  document.getElementById('alb-badge').className = 'fge-badge';
-  document.getElementById('alb-badge').textContent = '';
-  document.getElementById('kfre-vars-summary').innerHTML = '— Completá los datos del paciente y el ACR —';
-  document.getElementById('kfre-content').innerHTML = '<div class="kfre-pending-msg">Ingresá la albuminuria (Sección 5) y completá edad, sexo y creatinina para calcular el riesgo KFRE automáticamente.</div>';
-}
-
-// ─── BORRAR TODA LA BASE ───────────────────────────────────────────────────
-async function limpiarBase() {
-  if (!confirm('¿Seguro que querés borrar TODOS los registros?\nEsta acción elimina los datos de Airtable y no se puede deshacer.')) return;
-  mostrarToast('Eliminando registros...', '');
-  try {
-    await eliminarTodos();
-    await renderTabla();
-    mostrarToast('Base de datos borrada.', 'error');
-  } catch (err) {
-    console.error(err);
-    mostrarToast('⚠️ Error al borrar los registros.', 'error');
-  }
-}
-
-// ─── TOAST ─────────────────────────────────────────────────────────────────
-let toastTimer;
-function mostrarToast(msg, tipo) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + (tipo || '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = ''; }, 3400);
-}
-
-// ─── AUTOCARGA DESDE JSON ─────────────────────────────────────────────────
-function autocargaDesdeJSON() {
-  const raw = document.getElementById('autocarga-input').value.trim();
-  const msg = document.getElementById('autocarga-msg');
-  if (!raw) { msg.style.color = '#c0392b'; msg.textContent = '⚠️ Pegá un JSON primero.'; return; }
-  let d;
-  try { d = JSON.parse(raw); }
-  catch (e) { msg.style.color = '#c0392b'; msg.textContent = '⚠️ JSON inválido. Revisá que no falten comillas o comas.'; return; }
-
-  const setVal  = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
-  const setCheck = (id, val) => { const el = document.getElementById(id); if (el) { el.checked = val === true || val === 'Sí' || val === '1' || val === 1; el.dispatchEvent(new Event('change')); } };
-  const setRadio = (name, val) => { const el = document.querySelector(`input[name="${name}"][value="${val}"]`); if (el) { el.checked = true; el.dispatchEvent(new Event('change')); } };
-
-  setVal('hc', d.hc); setVal('edad', d.edad); setVal('sexo', d.sexo);
-  document.getElementById('sexo').dispatchEvent(new Event('change'));
-  setVal('fecha', d.fecha); setVal('hospital', d.hospital); setVal('cobertura', d.cobertura); setVal('motivo', d.motivo);
-  setCheck('erc', d.erc); setCheck('coronaria', d.coronaria); setCheck('ic', d.ic);
-  setCheck('hta', d.hta); setCheck('tabaquismo', d.tabaquismo); setCheck('evp', d.evp);
-  setCheck('dbt', d.dbt); setCheck('oncologica', d.oncologica); setCheck('autoinmune', d.autoinmune);
-  setCheck('litiasis', d.litiasis); setCheck('itu', d.itu); setCheck('hiv', d.hiv);
-  if (d.erc === true || d.erc === 'Sí') setVal('tiempo-erc', d.tiempo_erc);
-  setVal('tas', d.tas); setVal('tad', d.tad);
-  if (d.edemas !== undefined) setRadio('edemas', d.edemas === true || d.edemas === 'Sí' ? 'Sí' : 'No');
-  setVal('peso', d.peso); setVal('talla', d.talla); actualizarIMC();
-  setVal('creatinina', d.creatinina); setVal('urea', d.urea);
-  setVal('proteinuria', d.proteinuria); setVal('albuminuria', d.albuminuria);
-    setVal('hb', d.hb); setVal('potasio', d.k ?? d.potasio); setVal('pth', d.pth);
-  actualizarFGe(); actualizarKFRE();
-  if (d.biopsia !== undefined) {
-    const bVal = d.biopsia === true || d.biopsia === 'Sí' ? 'Sí' : 'No';
-    setRadio('biopsia', bVal);
-    if (bVal === 'Sí') { document.getElementById('biopsia-resultado-group').classList.add('active'); setVal('biopsia-resultado', d.biopsia_resultado); }
-  }
-  if (d.aki !== undefined)       setRadio('aki',       d.aki === true || d.aki === 'Sí' ? 'Sí' : 'No');
-  if (d.dialisis !== undefined)  setRadio('dialisis',  d.dialisis === true || d.dialisis === 'Sí' ? 'Sí' : 'No');
-  if (d.internacion !== undefined) setRadio('internacion', d.internacion === true || d.internacion === 'Sí' ? 'Sí' : 'No');
-  setCheck('ieca', d.ieca); setCheck('bb', d.bb); setCheck('isglt2', d.isglt2);
-  setCheck('mra', d.mra); setCheck('inmunosupresion', d.inmunosupresion);
-  setCheck('epo', d.epo); setCheck('glp1', d.glp1); setCheck('med_obesidad', d.med_obesidad);
-  setCheck('estatinas', d.estatinas); setCheck('diureticos', d.diureticos);
-  setCheck('aas', d.aas); setCheck('quelantes', d.quelantes);
-  setCheck('evento-cv', d.evento_cv ?? d.eventocv); setCheck('monorreno', d.monorreno);
-  setCheck('dislipemia', d.dislipemia ?? d.dlp); setCheck('poliquistosis', d.poliquistosis);
-  setCheck('aines', d.aines ?? d.nefrotóxico ?? d.nefrotóxicos); setCheck('uropatia', d.uropatia);
-  if (d.hco3 !== undefined) setVal('hco3', d.hco3);
-  if (d.acido_urico !== undefined) setVal('acido-urico', d.acido_urico);
-  if (d.ferritina !== undefined) setVal('ferritina', d.ferritina);
-  if (d.ldl !== undefined) setVal('ldl', d.ldl);
-  if (d.calcio !== undefined) setVal('calcio', d.calcio);
-  if (d.fosforo !== undefined) setVal('fosforo', d.fosforo);
-  if (d.glucemia !== undefined) setVal('glucemia', d.glucemia);
-  if (d.mace !== undefined) setRadio('mace', d.mace === true || d.mace === 'Sí' ? 'Sí' : 'No');
-  if (d.obito !== undefined) setRadio('obito', d.obito === true || d.obito === 'Sí' ? 'Sí' : 'No');
-  if (d.fecha_dialisis !== undefined) setVal('fecha-dialisis', d.fecha_dialisis);
-  if (d.aki_causal !== undefined) setVal('aki-causal', d.aki_causal);
-  setCheck('aki-previo', d.aki_previo ?? d.aki_anterior);
-  setCheck('glomerulopatia', d.glomerulopatia ?? d.glomerulo);
-  if (d.hba1c !== undefined) setVal('hba1c', d.hba1c);
-  if (d.sodio !== undefined) setVal('sodio', d.sodio);
-  if (d.cloro !== undefined) setVal('cloro', d.cloro);
-  actualizarAlbuminuriaKDIGO();
-
-  msg.style.color = '#1e8449';
-  msg.textContent = '✓ Formulario completado. Revisá los datos y guardá el registro.';
-  document.getElementById('autocarga-panel').style.display = 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  mostrarToast('⚡ Formulario autocargado. Revisá y guardá.', 'success');
-}
-
-
-
-
-
-
-
-// ═══════════════════════════════════════════════════════════════
-// BÚSQUEDA RÁPIDA — PRECARGAR ÚLTIMA VISITA POR HC
-// ═══════════════════════════════════════════════════════════════
-async function precargarPaciente() {
-  const hcBusq = document.getElementById('buscar-hc-input').value.trim();
-  if (!hcBusq) { mostrarToast('Ingresá un N° HC para precargar.', 'error'); return; }
-  mostrarToast('Buscando paciente...', '');
-  const db = await cargarDB();
-
-  // Descifrar y filtrar
-  const visitas = [];
-  for (const row of db) {
-    const hcD = await decryptHC(row['N° HC']);
-    if (hcD === hcBusq) visitas.push({ ...row, _hcD: hcD });
-  }
-  if (!visitas.length) { mostrarToast('❌ No se encontró el paciente.', 'error'); return; }
-
-  // Tomar la más reciente
-  visitas.sort((a, b) => new Date(b['Fecha']) - new Date(a['Fecha']));
-  const ultima = visitas[0];
-  const n = visitas.length;
-
-  // Precargar formulario con datos estables (antecedentes, medicación)
-  limpiarFormulario();
-
-  const setV  = (id, val) => { const el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; };
-  const setChk = (id, val) => { const el = document.getElementById(id); if (el) { el.checked = (val === 'Sí'); el.dispatchEvent(new Event('change')); } };
-  const setRad = (name, val) => { const el = document.querySelector(`input[name="${name}"][value="${val}"]`); if (el) { el.checked = true; el.dispatchEvent(new Event('change')); } };
-
-  // Identificación
-  document.getElementById('hc').value = hcBusq;
-  setV('edad', ultima['Edad']);
-  if (ultima['Sexo']) { document.getElementById('sexo').value = ultima['Sexo']; document.getElementById('sexo').dispatchEvent(new Event('change')); }
-  if (ultima['Hospital']) document.getElementById('hospital').value = ultima['Hospital'];
-  if (ultima['Cobertura']) document.getElementById('cobertura').value = ultima['Cobertura'];
-  // Fecha = hoy (nueva visita)
-  document.getElementById('fecha').valueAsDate = new Date();
-
-  // Antecedentes
-  setChk('erc', ultima['ERC']); setChk('coronaria', ultima['E.Coronaria']); setChk('ic', ultima['IC']);
-  setChk('hta', ultima['HTA']); setChk('tabaquismo', ultima['Tabaquismo']); setChk('evp', ultima['EVP']);
-  setChk('dbt', ultima['DBT']); setChk('oncologica', ultima['Oncológica']); setChk('autoinmune', ultima['Autoinmune']);
-  setChk('litiasis', ultima['Litiasis']); setChk('itu', ultima['ITU']); setChk('hiv', ultima['HIV']);
-  setChk('evento-cv', ultima['Evento CV (IAM/ACV)']); setChk('monorreno', ultima['Monorreno']);
-  setChk('dislipemia', ultima['Dislipemia']); setChk('poliquistosis', ultima['Poliquistosis']);
-  setChk('aines', ultima['AINEs/Nefrotóxico']); setChk('uropatia', ultima['Uropatía Obstructiva']);
-  setChk('aki-previo', ultima['AKI Previo (Antec.)']); setChk('glomerulopatia', ultima['Glomerulopatía (Antec.)']);
-
-  // Medicación
-  setChk('ieca', ultima['IECA/ARAII']); setChk('bb', ultima['BB']); setChk('isglt2', ultima['iSGLT2']);
-  setChk('mra', ultima['MRA']); setChk('inmunosupresion', ultima['Inmunosupresión']); setChk('epo', ultima['EPO']);
-  setChk('estatinas', ultima['Estatinas']); setChk('diureticos', ultima['Diuréticos']);
-  setChk('aas', ultima['AAS/Antiagregantes']); setChk('quelantes', ultima['Quelantes/Vit D']);
-
-  // Tiempo ERC si existe
-  if (ultima['Tiempo ERC (años)']) setV('tiempo-erc', ultima['Tiempo ERC (años)']);
-
-  mostrarToast(`✓ Datos de HC ${hcBusq} precargados (${n} visita${n!==1?'s':''} previas). Completá los datos de hoy.`, 'success');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// EXPORTAR PDF RESUMEN POR PACIENTE
-// ═══════════════════════════════════════════════════════════════
-async function exportarPDFPaciente() {
-  const hcBusq = document.getElementById('buscar-hc-input').value.trim()
-                 || document.getElementById('hc').value.trim();
-  if (!hcBusq) { mostrarToast('Ingresá un N° HC en la barra de búsqueda o en el formulario.', 'error'); return; }
-  mostrarToast('Generando PDF...', '');
-  const db = await cargarDB();
-
-  const visitas = [];
-  for (const row of db) {
-    const hcD = await decryptHC(row['N° HC']);
-    if (hcD === hcBusq) visitas.push({ ...row, _hcD: hcD });
-  }
-  if (!visitas.length) { mostrarToast('❌ No se encontró el paciente.', 'error'); return; }
-  visitas.sort((a, b) => new Date(a['Fecha']) - new Date(b['Fecha']));
-
-  const primera = visitas[0];
-  const ultima  = visitas[visitas.length - 1];
-  const n       = visitas.length;
-  const fges    = visitas.map(v => parseFloat(v['FGe CKD-EPI'])).filter(v => !isNaN(v) && v > 0);
-  const deltaAnual = (() => {
-    const c = visitas.filter(v => !isNaN(parseFloat(v['FGe CKD-EPI'])) && v['Fecha']);
-    if (c.length < 2) return null;
-    const dias = (new Date(c[c.length-1]['Fecha']) - new Date(c[0]['Fecha'])) / 86400000;
-    if (dias < 30) return null;
-    return ((parseFloat(c[c.length-1]['FGe CKD-EPI']) - parseFloat(c[0]['FGe CKD-EPI'])) / dias * 365).toFixed(1);
-  })();
-
-  // Construir antecedentes activos
-  const antList = [
-    ['ERC', primera['ERC']], ['HTA', primera['HTA']], ['Diabetes', primera['DBT']],
-    ['Tabaquismo', primera['Tabaquismo']], ['E. Coronaria', primera['E.Coronaria']],
-    ['IC', primera['IC']], ['Evento CV', primera['Evento CV (IAM/ACV)']],
-    ['Dislipemia', primera['Dislipemia']], ['Monorreno', primera['Monorreno']],
-    ['Poliquistosis', primera['Poliquistosis']], ['AKI Previo', primera['AKI Previo (Antec.)']],
-    ['Glomerulopatía', primera['Glomerulopatía (Antec.)']],
-    ['AINEs/Nefrotóxico', primera['AINEs/Nefrotóxico']],
-  ].filter(([,v]) => v === 'Sí').map(([k]) => k);
-
-  const medList = [
-    ['IECA/ARA II', ultima['IECA/ARAII']], ['iSGLT2', ultima['iSGLT2']],
-    ['MRA', ultima['MRA']], ['BB', ultima['BB']], ['Estatinas', ultima['Estatinas']],
-    ['Diuréticos', ultima['Diuréticos']], ['AAS', ultima['AAS/Antiagregantes']],
-    ['Quelantes/Vit D', ultima['Quelantes/Vit D']], ['EPO', ultima['EPO']],
-    ['Inmunosupresión', ultima['Inmunosupresión']],
-  ].filter(([,v]) => v === 'Sí').map(([k]) => k);
-
-  // Tabla de visitas
-  const filas = visitas.map(v => {
-    const fge = parseFloat(v['FGe CKD-EPI']);
-    return `<tr>
-      <td>${v['Fecha'] || ''}</td>
-      <td>${v['Creat (mg/dL)'] || ''}</td>
-      <td style="font-weight:600;color:${fge<15?'#922b21':fge<30?'#e74c3c':fge<60?'#e67e22':'#1e8449'}">${isNaN(fge)||fge<=0?'':fge.toFixed(0)}</td>
-      <td>${v['Estadio ERC (KDIGO)'] || ''}</td>
-      <td>${v['K (mEq/L)'] || ''}</td>
-      <td>${v['HCO3 (mEq/L)'] || ''}</td>
-      <td>${v['Hb (g/dL)'] || ''}</td>
-      <td>${v['Albuminuria (mg/24h)'] || ''}</td>
-      <td>${v['TAS (mmHg)'] ? v['TAS (mmHg)']+'/'+v['TAD (mmHg)'] : ''}</td>
-      <td>${v['KFRE Riesgo 5a'] || ''}</td>
-    </tr>`;
-  }).join('');
-
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-  <title>Resumen Nefrológico — HC ${hcBusq}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; color: #1a1a2e; background: white; padding: 32px 40px; font-size: 11px; }
-    .header { border-bottom: 3px solid #c0392b; padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: flex-end; justify-content: space-between; }
-    .header h1 { font-family: 'DM Serif Display', serif; font-size: 22px; color: #1a1a2e; }
-    .header .sub { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
-    .header .meta { text-align: right; font-size: 9px; color: #7f8c8d; }
-    .section-title { font-family: 'DM Serif Display', serif; font-size: 13px; color: #1a1a2e; border-bottom: 1.5px solid #d5c9b8; padding-bottom: 5px; margin: 18px 0 10px; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 12px; }
-    .field { margin-bottom: 4px; }
-    .field label { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #7f8c8d; font-weight: 600; display: block; }
-    .field span { font-size: 11px; color: #1a1a2e; font-weight: 500; }
-    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag { background: #eaf4fb; border: 1px solid #aed6f1; border-radius: 10px; padding: 2px 8px; font-size: 9px; color: #1a5276; font-weight: 600; }
-    .tag.med { background: #eafaf1; border-color: #a9dfbf; color: #1e8449; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
-    thead th { background: #1a1a2e; color: rgba(255,255,255,0.85); padding: 6px 8px; text-align: left; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
-    tbody tr { border-bottom: 1px solid #ece8e0; }
-    tbody tr:nth-child(even) { background: #fafaf7; }
-    tbody td { padding: 5px 8px; }
-    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
-    .kpi { border: 1.5px solid #d5c9b8; border-radius: 4px; padding: 10px 12px; text-align: center; }
-    .kpi-val { font-family: 'DM Serif Display', serif; font-size: 20px; color: #1a1a2e; line-height: 1; }
-    .kpi-lbl { font-size: 8px; text-transform: uppercase; letter-spacing: 0.08em; color: #7f8c8d; margin-top: 3px; font-weight: 600; }
-    .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #d5c9b8; font-size: 8px; color: #aaa; }
-    @media print { body { padding: 16px 20px; } }
-  </style></head><body>
-  <div class="header">
-    <div>
-      <h1>🩺 Resumen Nefrológico</h1>
-      <div class="sub">Registro de seguimiento · Sistema de consultorios</div>
-    </div>
-    <div class="meta">
-      HC: <strong>${hcBusq}</strong><br>
-      Generado: ${new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'long',year:'numeric'})}<br>
-      ${n} consulta${n!==1?'s':''} registrada${n!==1?'s':''}
-    </div>
-  </div>
-
-  <div class="section-title">Identificación</div>
-  <div class="grid2">
-    <div class="field"><label>Edad</label><span>${primera['Edad'] || '—'} años</span></div>
-    <div class="field"><label>Sexo</label><span>${primera['Sexo'] || '—'}</span></div>
-    <div class="field"><label>Hospital</label><span>${primera['Hospital'] || '—'}</span></div>
-    <div class="field"><label>Cobertura</label><span>${primera['Cobertura'] || '—'}</span></div>
-    <div class="field"><label>Primera consulta</label><span>${primera['Fecha'] || '—'}</span></div>
-    <div class="field"><label>Última consulta</label><span>${ultima['Fecha'] || '—'}</span></div>
-  </div>
-
-  <div class="section-title">Evolución de FGe</div>
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-val">${fges.length ? fges[0].toFixed(0) : '—'}</div><div class="kpi-lbl">FGe inicial</div></div>
-    <div class="kpi"><div class="kpi-val">${fges.length ? fges[fges.length-1].toFixed(0) : '—'}</div><div class="kpi-lbl">FGe actual</div></div>
-    <div class="kpi"><div class="kpi-val" style="color:${deltaAnual&&parseFloat(deltaAnual)<0?'#c0392b':'#27ae60'}">${deltaAnual!==null?(parseFloat(deltaAnual)>0?'+':'')+deltaAnual:'—'}</div><div class="kpi-lbl">mL/min/año</div></div>
-    <div class="kpi"><div class="kpi-val">${ultima['Estadio ERC (KDIGO)']?ultima['Estadio ERC (KDIGO)'].split('—')[0].trim():'—'}</div><div class="kpi-lbl">Estadio actual</div></div>
-  </div>
-
-  <div class="section-title">Antecedentes</div>
-  <div class="tags">${antList.length ? antList.map(a=>'<span class="tag">'+a+'</span>').join('') : '<span style="color:#aaa">Sin antecedentes cargados</span>'}</div>
-
-  <div class="section-title">Medicación actual</div>
-  <div class="tags">${medList.length ? medList.map(m=>'<span class="tag med">'+m+'</span>').join('') : '<span style="color:#aaa">Sin medicación cargada</span>'}</div>
-
-  <div class="section-title">Historial de consultas</div>
-  <table>
-    <thead><tr>
-      <th>Fecha</th><th>Creat.</th><th>FGe</th><th>Estadio</th>
-      <th>K</th><th>HCO₃</th><th>Hb</th><th>Alb.</th><th>TA</th><th>KFRE 5a</th>
-    </tr></thead>
-    <tbody>${filas}</tbody>
-  </table>
-
-  <div class="footer">
-    Registro Nefrológico · CKD-EPI 2021 · KFRE (Tangri et al. JAMA 2011) · Generado el ${new Date().toLocaleString('es-AR')} · Documento de uso médico interno.
-  </div>
-  </body></html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(() => win.print(), 600);
-  mostrarToast('✓ PDF generado. Usá Ctrl+P / Cmd+P para guardar como PDF.', 'success');
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// BÚSQUEDA RÁPIDA — Precargar formulario con última visita
-// ═══════════════════════════════════════════════════════════════
-async function precargarPaciente() {
-  const hcBusq = document.getElementById('busq-hc-input').value.trim();
-  const msgEl  = document.getElementById('busqueda-rapida-msg');
-  if (!hcBusq) { msgEl.style.color = '#c0392b'; msgEl.textContent = '⚠️ Ingresá un N° HC.'; return; }
-  msgEl.style.color = '#1a5276'; msgEl.textContent = '🔍 Buscando...';
-
-  const db = await cargarDB();
-  const visitas = [];
-  for (const row of db) {
-    const hcDesc = await decryptHC(row['N° HC']);
-    if (hcDesc === hcBusq) visitas.push(row);
-  }
-
-  if (!visitas.length) {
-    msgEl.style.color = '#c0392b';
-    msgEl.textContent = `❌ No se encontraron registros para HC ${hcBusq}.`;
-    return;
-  }
-
-  visitas.sort((a, b) => new Date(b['Fecha']) - new Date(a['Fecha']));
-  const ultima = visitas[0];
-  const n = visitas.length;
-
-  // Precargar formulario con datos de la última visita (excepto fecha)
-  const setVal  = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null && val !== '') el.value = val; };
-  const setCheck = (id, val) => { const el = document.getElementById(id); if (el) { el.checked = val === 'Sí'; el.dispatchEvent(new Event('change')); } };
-  const setRadio = (name, val) => { const el = document.querySelector(`input[name="${name}"][value="${val}"]`); if (el) { el.checked = true; el.dispatchEvent(new Event('change')); } };
-
-  // Limpiar primero
-  limpiarFormulario();
-
-  // HC se completa con el buscado
-  document.getElementById('hc').value = hcBusq;
-
-  setVal('edad',       ultima['Edad']);
-  document.getElementById('sexo').value = ultima['Sexo'] || '';
-  document.getElementById('sexo').dispatchEvent(new Event('change'));
-  setVal('hospital',   ultima['Hospital']);
-  document.getElementById('hospital').dispatchEvent(new Event('change'));
-  setVal('cobertura',  ultima['Cobertura']);
-  document.getElementById('cobertura').dispatchEvent(new Event('change'));
-
-  // Antecedentes
-  setCheck('erc',         ultima['ERC']);
-  setCheck('coronaria',   ultima['E.Coronaria']);
-  setCheck('ic',          ultima['IC']);
-  setCheck('hta',         ultima['HTA']);
-  setCheck('tabaquismo',  ultima['Tabaquismo']);
-  setCheck('evp',         ultima['EVP']);
-  setCheck('dbt',         ultima['DBT']);
-  setCheck('oncologica',  ultima['Oncológica']);
-  setCheck('autoinmune',  ultima['Autoinmune']);
-  setCheck('litiasis',    ultima['Litiasis']);
-  setCheck('itu',         ultima['ITU']);
-  setCheck('hiv',         ultima['HIV']);
-  setCheck('evento-cv',   ultima['Evento CV (IAM/ACV)']);
-  setCheck('monorreno',   ultima['Monorreno']);
-  setCheck('dislipemia',  ultima['Dislipemia']);
-  setCheck('poliquistosis', ultima['Poliquistosis']);
-  setCheck('aines',       ultima['AINEs/Nefrotóxico']);
-  setCheck('uropatia',    ultima['Uropatía Obstructiva']);
-  setCheck('aki-previo',  ultima['AKI Previo (Antec.)']);
-  setCheck('glomerulopatia', ultima['Glomerulopatía (Antec.)']);
-
-  // Medicación
-  setCheck('ieca',           ultima['IECA/ARAII']);
-  setCheck('bb',             ultima['BB']);
-  setCheck('isglt2',         ultima['iSGLT2']);
-  setCheck('mra',            ultima['MRA']);
-  setCheck('inmunosupresion',ultima['Inmunosupresión']);
-  setCheck('epo',            ultima['EPO']);
-  setCheck('estatinas',      ultima['Estatinas']);
-  setCheck('diureticos',     ultima['Diuréticos']);
-  setCheck('aas',            ultima['AAS/Antiagregantes']);
-  setCheck('quelantes',      ultima['Quelantes/Vit D']);
-
-  // Fecha hoy (nueva consulta)
-  document.getElementById('fecha').valueAsDate = new Date();
-
-  // Scroll al top del formulario
-  document.getElementById('main-form').scrollIntoView({ behavior: 'smooth' });
-
-  msgEl.style.color = '#1e8449';
-  msgEl.textContent = `✓ Datos cargados desde la última visita (${formatFecha(ultima['Fecha'])}). Total: ${n} consulta${n!==1?'s':''} previas. Completá los datos nuevos y guardá.`;
-  mostrarToast('✓ Paciente HC ' + hcBusq + ' precargado — ' + n + ' visita' + (n!==1?'s':'a') + ' previa' + (n!==1?'s':'') + '.', 'success');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PDF RESUMEN INDIVIDUAL
-// ═══════════════════════════════════════════════════════════════
-async function abrirPDFdesdeHC() {
-  const hcBusq = document.getElementById('busq-hc-input').value.trim();
-  const msgEl  = document.getElementById('busqueda-rapida-msg');
-  if (!hcBusq) { msgEl.style.color = '#c0392b'; msgEl.textContent = '⚠️ Ingresá un N° HC para generar el PDF.'; return; }
-  msgEl.style.color = '#1a5276'; msgEl.textContent = '📄 Generando PDF...';
-
-  const db = await cargarDB();
-  const visitas = [];
-  for (const row of db) {
-    const hcDesc = await decryptHC(row['N° HC']);
-    if (hcDesc === hcBusq) visitas.push(row);
-  }
-
-  if (!visitas.length) { msgEl.style.color='#c0392b'; msgEl.textContent=`❌ Sin registros para HC ${hcBusq}.`; return; }
-
-  visitas.sort((a, b) => new Date(a['Fecha']) - new Date(b['Fecha']));
-  generarPDFResumen(visitas, hcBusq);
-  msgEl.textContent = '';
-}
-
-function generarPDFResumen(visitas, hc) {
-  const ultima  = visitas[visitas.length - 1];
-  const primera = visitas[0];
-  const n = visitas.length;
-
-  const fges = visitas.map(v => parseFloat(v['FGe CKD-EPI'])).filter(v => !isNaN(v) && v > 0);
-  const fgeActual  = fges[fges.length-1] || null;
-  const fgeInicial = fges[0] || null;
-  const deltaAnual = calcularDeltaAnual(visitas);
-
-  const hoy = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
-
-  // ── Antecedentes activos
-  const antFields = [
-    ['ERC','ERC'], ['HTA','HTA'], ['DBT','Diabetes'], ['E.Coronaria','Coronaria'],
-    ['IC','IC'], ['Tabaquismo','Tabaquismo'], ['Evento CV (IAM/ACV)','Evento CV'],
-    ['Dislipemia','Dislipemia'], ['AKI Previo (Antec.)','AKI Previo'],
-    ['Glomerulopatía (Antec.)','Glomerulopatía'], ['Monorreno','Monorreno'],
-    ['AINEs/Nefrotóxico','AINEs'], ['Poliquistosis','Poliquistosis'],
-    ['Uropatía Obstructiva','Uropatía'], ['HIV','HIV'],
-  ];
-  const antActivos = antFields.filter(([k]) => ultima[k] === 'Sí').map(([,l]) => l);
-
-  // ── Medicación activa
-  const medFields = [
-    ['IECA/ARAII','IECA/ARA II'], ['BB','Betabloqueante'], ['iSGLT2','iSGLT2'],
-    ['MRA','MRA'], ['Inmunosupresión','Inmunosupresión'], ['EPO','EPO'],
-    ['Estatinas','Estatinas'], ['Diuréticos','Diuréticos'],
-    ['AAS/Antiagregantes','AAS/Antiagr.'], ['Quelantes/Vit D','Quelantes/Vit D'],
-  ];
-  const medActiva = medFields.filter(([k]) => ultima[k] === 'Sí').map(([,l]) => l);
-
-  // ── Lab última visita
-  const labItems = [
-    { l: 'Creatinina', v: ultima['Creat (mg/dL)'], u: 'mg/dL', alert: v => parseFloat(v) > 1.5 },
-    { l: 'FGe CKD-EPI', v: fgeActual, u: 'mL/min', highlight: true, alert: v => parseFloat(v) < 30 },
-    { l: 'Urea', v: ultima['Urea (mg/dL)'], u: 'mg/dL', alert: v => parseFloat(v) > 100 },
-    { l: 'Potasio', v: ultima['K (mEq/L)'], u: 'mEq/L', alert: v => parseFloat(v) > 5.5 },
-    { l: 'HCO₃', v: ultima['HCO3 (mEq/L)'], u: 'mEq/L', alert: v => parseFloat(v) < 18 },
-    { l: 'Hemoglobina', v: ultima['Hb (g/dL)'], u: 'g/dL', alert: v => parseFloat(v) < 10 },
-    { l: 'Albuminuria', v: ultima['Albuminuria (mg/24h)'], u: 'mg/24h', alert: v => parseFloat(v) > 300 },
-    { l: 'Proteinuria', v: ultima['Proteinuria (mg/24h)'], u: 'mg/24h', alert: () => false },
-    { l: 'PTH', v: ultima['PTH (pg/mL)'], u: 'pg/mL', alert: () => false },
-    { l: 'LDL', v: ultima['LDL (mg/dL)'], u: 'mg/dL', alert: v => parseFloat(v) > 100 },
-    { l: 'HbA1c', v: ultima['HbA1c (%)'], u: '%', alert: v => parseFloat(v) > 8 },
-    { l: 'Glucemia', v: ultima['Glucemia (mg/dL)'], u: 'mg/dL', alert: v => parseFloat(v) > 180 },
-    { l: 'Ácido Úrico', v: ultima['Ácido Úrico (mg/dL)'], u: 'mg/dL', alert: () => false },
-    { l: 'Ferritina', v: ultima['Ferritina (ng/mL)'], u: 'ng/mL', alert: () => false },
-    { l: 'Sodio', v: ultima['Sodio (mEq/L)'], u: 'mEq/L', alert: v => parseFloat(v) < 135 || parseFloat(v) > 145 },
-  ].filter(i => i.v !== undefined && i.v !== null && i.v !== '');
-
-  const labHTML = labItems.map(i => {
-    const cls = i.alert(i.v) ? 'alert' : (i.highlight ? 'highlight' : '');
-    return `<div class="pdf-field"><div class="pdf-field-label">${i.l}</div><div class="pdf-field-value ${cls}">${i.v} <span style="font-weight:400;font-size:0.72rem;color:#aaa;">${i.u}</span></div></div>`;
-  }).join('');
-
-  // ── Timeline de visitas
-  const timelineHTML = visitas.map((v, i) => {
-    const fge = parseFloat(v['FGe CKD-EPI']);
-    const fgePrev = i > 0 ? parseFloat(visitas[i-1]['FGe CKD-EPI']) : null;
-    const delta = (!isNaN(fge) && fgePrev && !isNaN(fgePrev)) ? (fge - fgePrev).toFixed(1) : null;
-    const deltaCls = delta !== null ? (parseFloat(delta) < 0 ? 'neg' : 'pos') : '';
-    const deltaStr = delta !== null ? `<span class="pdf-visit-delta ${deltaCls}">${parseFloat(delta)>0?'+':''}${delta}</span>` : '';
-    return `<div class="pdf-visit-row">
-      <span class="pdf-visit-fecha">${formatFecha(v['Fecha'])}</span>
-      <span class="pdf-visit-fge">${!isNaN(fge)&&fge>0 ? fge.toFixed(0)+' mL/min' : '—'}</span>
-      ${deltaStr}
-      <span style="color:#aaa;font-size:0.7rem;margin-left:auto;">${v['Estadio ERC (KDIGO)']||''}</span>
-    </div>`;
-  }).join('');
-
-  // ── KFRE
-  const kfre2 = ultima['KFRE Riesgo 2a'] || '';
-  const kfre5 = ultima['KFRE Riesgo 5a'] || '';
-  const kfrecat = ultima['KFRE Categoría'] || '';
-  const kfreHTML = (kfre2 || kfre5) ? `
-    <div class="pdf-kfre-box">
-      ${kfre2 ? '<div class=\"pdf-kfre-val\"><div class=\"pdf-kfre-num\">' + kfre2 + '</div><div class=\"pdf-kfre-lbl\">Riesgo 2 años</div></div>' : ''}
-      ${kfre5 ? '<div class=\"pdf-kfre-val\"><div class=\"pdf-kfre-num\">' + kfre5 + '</div><div class=\"pdf-kfre-lbl\">Riesgo 5 años</div></div>' : ''}
-      ${kfrecat ? '<div style=\"margin-left:auto;font-size:0.82rem;color:rgba(255,255,255,0.7);">Categoría: <strong style=\"color:white\">' + kfrecat + '</strong></div>' : ''}
-    </div>` : '';
-
-  const html = `
-  <div class="pdf-resumen">
-    <div class="pdf-header-block">
-      <h2>Registro Nefrológico — Resumen de Paciente</h2>
-      <p>HC: ${hc} · Generado: ${hoy} · ${n} consulta${n!==1?'s':''} registrada${n!==1?'s':''}</p>
-    </div>
-
-    <div class="pdf-section-title">Datos del Paciente</div>
-    <div class="pdf-grid">
-      <div class="pdf-field"><div class="pdf-field-label">N° HC</div><div class="pdf-field-value highlight">${hc}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Edad</div><div class="pdf-field-value">${ultima['Edad']||'—'} años</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Sexo</div><div class="pdf-field-value">${ultima['Sexo']||'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Hospital</div><div class="pdf-field-value">${ultima['Hospital']||'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Cobertura</div><div class="pdf-field-value">${ultima['Cobertura']||'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Primera consulta</div><div class="pdf-field-value">${formatFecha(primera['Fecha'])}</div></div>
-    </div>
-
-    <div class="pdf-section-title">Estadio ERC y Progresión</div>
-    <div class="pdf-grid">
-      <div class="pdf-field"><div class="pdf-field-label">Estadio actual (KDIGO)</div><div class="pdf-field-value highlight">${ultima['Estadio ERC (KDIGO)']||'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">FGe inicial</div><div class="pdf-field-value">${fgeInicial!==null?fgeInicial.toFixed(0)+' mL/min':'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">FGe actual</div><div class="pdf-field-value ${fgeActual&&fgeActual<30?'alert':'highlight'}">${fgeActual!==null?fgeActual.toFixed(0)+' mL/min':'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Velocidad progresión</div><div class="pdf-field-value ${deltaAnual&&parseFloat(deltaAnual)<-5?'alert':''}">${deltaAnual!==null?deltaAnual+' mL/min/año':'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Albuminuria KDIGO</div><div class="pdf-field-value">${ultima['Albuminuria KDIGO']||'—'}</div></div>
-      <div class="pdf-field"><div class="pdf-field-label">Tiempo en seguimiento</div><div class="pdf-field-value">${calcularTiempoSeguimiento(primera['Fecha'], ultima['Fecha'])}</div></div>
-    </div>
-
-    ${kfreHTML ? '<div class=\"pdf-section-title\">Score KFRE</div>' + kfreHTML : ''}
-
-    <div class="pdf-section-title">Laboratorio — Última visita (${formatFecha(ultima['Fecha'])})</div>
-    <div class="pdf-grid">${labHTML || '<div style="color:#aaa;font-size:0.82rem;padding:8px;">Sin laboratorio registrado.</div>'}</div>
-
-    <div class="pdf-section-title">Antecedentes</div>
-    <div class="pdf-chips">${antActivos.length ? antActivos.map(a=>'<span class="pdf-chip">'+a+'</span>').join('') : '<span style="color:#aaa;font-size:0.8rem;">Ninguno registrado</span>'}</div>
-
-    <div class="pdf-section-title">Medicación activa</div>
-    <div class="pdf-chips">${medActiva.length ? medActiva.map(m=>'<span class="pdf-chip med">'+m+'</span>').join('') : '<span style="color:#aaa;font-size:0.8rem;">Ninguna registrada</span>'}</div>
-
-    <div class="pdf-section-title">Historial de consultas (FGe)</div>
-    <div class="pdf-timeline-mini">${timelineHTML}</div>
-
-    <div class="pdf-footer">Registro Nefrológico · CKD-EPI 2021 + KFRE (Tangri et al., JAMA 2011) · Documento generado automáticamente · Solo para uso clínico interno</div>
-  </div>`;
-
-  document.getElementById('pdf-content').innerHTML = html;
-  document.getElementById('pdf-modal').classList.add('open');
-}
-
-function calcularTiempoSeguimiento(fechaInicio, fechaFin) {
-  if (!fechaInicio || !fechaFin) return '—';
-  const meses = Math.round((new Date(fechaFin) - new Date(fechaInicio)) / (1000*60*60*24*30.4));
-  if (meses < 1) return 'Menos de 1 mes';
-  if (meses < 12) return meses + ' mes' + (meses!==1?'es':'');
-  const años = (meses / 12).toFixed(1);
-  return años + ' año' + (parseFloat(años)!==1?'s':'');
-}
-
-function cerrarPDFModal() {
-  document.getElementById('pdf-modal').classList.remove('open');
-}
-
-function imprimirPDF() {
-  const contenido = document.getElementById('pdf-content').innerHTML;
-  const printArea = document.getElementById('pdf-print-area');
-  printArea.innerHTML = `<div class="pdf-resumen">${contenido}</div>`;
-  printArea.style.display = 'block';
-  window.print();
-  setTimeout(() => { printArea.style.display = 'none'; printArea.innerHTML = ''; }, 1000);
-}
-
-// Cerrar modal con Escape
-document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarPDFModal(); });
-document.getElementById('pdf-modal').addEventListener('click', function(e) { if (e.target === this) cerrarPDFModal(); });
-// ═══════════════════════════════════════════════════════════════
-// SEGUIMIENTO LONGITUDINAL
-// ═══════════════════════════════════════════════════════════════
-let _seguimientoVisible = false;
-
-function toggleSeguimiento() {
-  _seguimientoVisible = !_seguimientoVisible;
-  const sec = document.getElementById('seguimiento-section');
-  const btn = document.getElementById('btn-seguimiento');
-  sec.style.display = _seguimientoVisible ? 'block' : 'none';
-  btn.textContent = _seguimientoVisible ? '📈 Ocultar seguimiento' : '📈 Seguimiento';
-  if (!_seguimientoVisible) limpiarSeguimiento();
-}
-
-function limpiarSeguimiento() {
-  document.getElementById('seg-hc-input').value = '';
-  document.getElementById('seg-resultado').innerHTML = '';
-}
-
-async function buscarPaciente() {
-  const hcBusqueda = document.getElementById('seg-hc-input').value.trim();
-  if (!hcBusqueda) { mostrarToast('Ingresá un N° HC para buscar.', 'error'); return; }
-
-  document.getElementById('seg-resultado').innerHTML = '<div class="seg-no-results">🔍 Buscando...</div>';
-
-  const db = await cargarDB();
-
-  // Descifrar todos los HC y filtrar por el buscado
-  const visitas = [];
-  for (const row of db) {
-    const hcDesc = await decryptHC(row['N° HC']);
-    if (hcDesc === hcBusqueda || hcDesc === '🔒') {
-      // Si no se pudo descifrar, intentar match directo (modo fallback)
-      if (hcDesc === '🔒' && row['N° HC'] === hcBusqueda) {
-        visitas.push({ ...row, _hcDecrypted: hcBusqueda });
-      } else if (hcDesc === hcBusqueda) {
-        visitas.push({ ...row, _hcDecrypted: hcBusqueda });
-      }
-    }
-  }
-
-  if (!visitas.length) {
-    document.getElementById('seg-resultado').innerHTML =
-      `<div class="seg-no-results">❌ No se encontraron registros para HC <strong>${hcBusqueda}</strong>.<br><small>Verificá el número o que el paciente tenga registros cargados.</small></div>`;
-    return;
-  }
-
-  // Ordenar por fecha
-  visitas.sort((a, b) => new Date(a['Fecha']) - new Date(b['Fecha']));
-
-  renderSeguimiento(visitas, hcBusqueda);
-}
-
-function renderSeguimiento(visitas, hc) {
-  const n = visitas.length;
-  const primera = visitas[0];
-  const ultima  = visitas[n - 1];
-
-  // Datos del paciente
-  const edad  = primera['Edad'] || '—';
-  const sexo  = primera['Sexo'] || '—';
-  const fges  = visitas.map(v => parseFloat(v['FGe CKD-EPI'])).filter(v => !isNaN(v) && v > 0);
-  const fgeInicial = fges[0] || null;
-  const fgeActual  = fges[fges.length - 1] || null;
-  const deltaTotal = (fgeInicial && fgeActual) ? (fgeActual - fgeInicial).toFixed(1) : null;
-  const deltaAnual = calcularDeltaAnual(visitas);
-
-  // KPIs del header
-  const deltaTotalCls = deltaTotal === null ? 'delta-neu' : parseFloat(deltaTotal) < 0 ? 'delta-neg' : 'delta-pos';
-  const deltaAnualCls = deltaAnual === null ? 'delta-neu' : parseFloat(deltaAnual) < 0 ? 'delta-neg' : 'delta-pos';
-
-  let html = `
-    <div class="seg-patient-header">
-      <div>
-        <div class="seg-patient-id">HC: ${hc}</div>
-        <div class="seg-patient-meta">${edad} años · ${sexo} · ${n} consulta${n!==1?'s':''} registrada${n!==1?'s':''}</div>
-      </div>
-      <div class="seg-kpis">
-        <div class="seg-kpi">
-          <div class="seg-kpi-val">${fgeInicial !== null ? fgeInicial.toFixed(0) : '—'}</div>
-          <div class="seg-kpi-label">FGe inicial</div>
-        </div>
-        <div class="seg-kpi">
-          <div class="seg-kpi-val">${fgeActual !== null ? fgeActual.toFixed(0) : '—'}</div>
-          <div class="seg-kpi-label">FGe actual</div>
-        </div>
-        <div class="seg-kpi">
-          <div class="seg-kpi-val ${deltaTotalCls}">${deltaTotal !== null ? (parseFloat(deltaTotal) > 0 ? '+' : '') + deltaTotal : '—'}</div>
-          <div class="seg-kpi-label">Δ FGe total</div>
-        </div>
-        <div class="seg-kpi">
-          <div class="seg-kpi-val ${deltaAnualCls}">${deltaAnual !== null ? (parseFloat(deltaAnual) > 0 ? '+' : '') + deltaAnual : '—'}</div>
-          <div class="seg-kpi-label">mL/min/año</div>
-        </div>
-      </div>
-    </div>`;
-
-  // Curva SVG de FGe
-  if (fges.length >= 2) {
-    html += renderCurvaFGe(visitas);
-  }
-
-  // Timeline de visitas
-  html += `<div class="seg-timeline" style="margin-top:20px;">`;
-  visitas.forEach((v, i) => {
-    const fge = parseFloat(v['FGe CKD-EPI']);
-    const fgePrev = i > 0 ? parseFloat(visitas[i-1]['FGe CKD-EPI']) : null;
-    const delta = (!isNaN(fge) && fgePrev && !isNaN(fgePrev)) ? (fge - fgePrev).toFixed(1) : null;
-    const dotCls = i === 0 ? 'first' : i === n-1 ? 'last' : '';
-    const fecha = formatFecha(v['Fecha']);
-    const estadio = v['Estadio ERC (KDIGO)'] || ((!isNaN(fge) && fge > 0) ? estadioKDIGO(fge) : '');
-    const kfre5 = v['KFRE Riesgo 5a'] || '';
-
-    // Lab chips
-    const labs = [];
-    if (v['Creat (mg/dL)']) labs.push({ t: `Cr: ${v['Creat (mg/dL)']}`, a: false });
-    if (!isNaN(fge) && fge > 0) labs.push({ t: `FGe: ${fge.toFixed(0)}`, a: fge < 15 });
-    if (v['K (mEq/L)']) labs.push({ t: `K: ${v['K (mEq/L)']}`, a: parseFloat(v['K (mEq/L)']) > 5.5 });
-    if (v['HCO3 (mEq/L)']) labs.push({ t: `HCO₃: ${v['HCO3 (mEq/L)']}`, a: parseFloat(v['HCO3 (mEq/L)']) < 18 });
-    if (v['Hb (g/dL)']) labs.push({ t: `Hb: ${v['Hb (g/dL)']}`, a: parseFloat(v['Hb (g/dL)']) < 10 });
-    if (v['Albuminuria (mg/24h)']) labs.push({ t: `Alb: ${v['Albuminuria (mg/24h)']} mg`, a: parseFloat(v['Albuminuria (mg/24h)']) > 300 });
-    if (v['HbA1c (%)']) labs.push({ t: `HbA1c: ${v['HbA1c (%)']}%`, a: parseFloat(v['HbA1c (%)']) > 8 });
-
-    const labChips = labs.map(l => `<span class="seg-lab-chip${l.a?' alert':''}">${l.t}</span>`).join('');
-    const deltaHTML = delta !== null ? `<span class="seg-visit-delta ${parseFloat(delta)<0?'neg':'pos'}">${parseFloat(delta)>0?'+':''}${delta} mL/min</span>` : '';
-
-    html += `
-      <div class="seg-visit">
-        <div class="seg-visit-date"><div class="seg-visit-date-text">${fecha}</div></div>
-        <div class="seg-visit-dot ${dotCls}"></div>
-        <div class="seg-visit-card">
-          <div style="display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;">
-            ${!isNaN(fge) && fge > 0 ? '<span class="seg-visit-fge">'+fge.toFixed(0)+'</span><span class="seg-visit-fge-unit">mL/min/1.73m²</span>'+deltaHTML : '<span style="color:var(--muted);font-size:0.85rem;">Sin FGe registrado</span>'}
-          </div>
-          <div class="seg-visit-meta">${estadio}${kfre5 ? ' · KFRE 5a: '+kfre5 : ''}${v['Motivo']?'<br>'+v['Motivo'].substring(0,80)+(v['Motivo'].length>80?'...':''):''}</div>
-          ${labChips ? '<div class="seg-visit-labs">'+labChips+'</div>' : ''}
-        </div>
+// ─── BUILD MMAS ─────────────────────────────────────────
+function buildMMAS() {
+  const container = document.getElementById("mmasItems");
+  container.innerHTML = "";
+  mmasItems.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "mmas-item";
+    div.innerHTML = `<div class="mmas-question">${item.q}${item.note ? `<em>${item.note}</em>` : ""}</div>
+      <div class="mmas-options">
+        <button class="mmas-btn si" data-id="${item.id}" onclick="selectMMAS('${item.id}','si',this)">Sí</button>
+        <button class="mmas-btn no" data-id="${item.id}" onclick="selectMMAS('${item.id}','no',this)">No</button>
       </div>`;
+    container.appendChild(div);
   });
-  html += `</div>`;
-
-  document.getElementById('seg-resultado').innerHTML = html;
+  const freqDiv = document.createElement("div");
+  freqDiv.className = "mmas-item";
+  freqDiv.innerHTML = `<div class="mmas-question">¿Cuán seguido tiene problemas para recordar tomar <strong>todos</strong> sus medicamentos?</div>
+    <div class="freq-options">${mmasFreqOpts.map(f => `<button class="freq-btn" data-freq="${f.val}" onclick="selectFreq(${f.val},this)">${f.label}</button>`).join("")}</div>`;
+  container.appendChild(freqDiv);
 }
 
-function calcularDeltaAnual(visitas) {
-  const conFGe = visitas.filter(v => !isNaN(parseFloat(v['FGe CKD-EPI'])) && parseFloat(v['FGe CKD-EPI']) > 0 && v['Fecha']);
-  if (conFGe.length < 2) return null;
-  const primera = conFGe[0];
-  const ultima  = conFGe[conFGe.length - 1];
-  const dias    = (new Date(ultima['Fecha']) - new Date(primera['Fecha'])) / (1000 * 60 * 60 * 24);
-  if (dias < 30) return null;
-  const deltaFGe = parseFloat(ultima['FGe CKD-EPI']) - parseFloat(primera['FGe CKD-EPI']);
-  return (deltaFGe / dias * 365).toFixed(1);
+function selectMMAS(id, val, btn) {
+  document.querySelectorAll(`.mmas-btn[data-id="${id}"]`).forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  state.mmas[id] = val;
 }
 
-function formatFecha(f) {
-  if (!f) return '—';
-  const d = new Date(f + 'T12:00:00');
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+function selectFreq(val, btn) {
+  document.querySelectorAll(".freq-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  state.mmasFreq = val;
 }
 
-function renderCurvaFGe(visitas) {
-  const datos = visitas
-    .filter(v => v['Fecha'] && !isNaN(parseFloat(v['FGe CKD-EPI'])) && parseFloat(v['FGe CKD-EPI']) > 0)
-    .map(v => ({ fecha: new Date(v['Fecha'] + 'T12:00:00'), fge: parseFloat(v['FGe CKD-EPI']) }));
-  if (datos.length < 2) return '';
-
-  const W = 600, H = 180, PAD = { top: 16, right: 20, bottom: 32, left: 44 };
-  const iW = W - PAD.left - PAD.right;
-  const iH = H - PAD.top - PAD.bottom;
-
-  const fechas = datos.map(d => d.fecha.getTime());
-  const fges   = datos.map(d => d.fge);
-  const minF   = Math.min(...fechas), maxF = Math.max(...fechas);
-  const minFGe = Math.max(0, Math.min(...fges) - 10);
-  const maxFGe = Math.max(...fges) + 10;
-
-  const xS = f => PAD.left + (f - minF) / (maxF - minF) * iW;
-  const yS = v => PAD.top + (1 - (v - minFGe) / (maxFGe - minFGe)) * iH;
-
-  // Zonas KDIGO coloreadas
-  const zonas = [
-    { min: 0,  max: 15, color: '#922b21', label: 'G5' },
-    { min: 15, max: 30, color: '#e74c3c', label: 'G4' },
-    { min: 30, max: 45, color: '#e67e22', label: 'G3b' },
-    { min: 45, max: 60, color: '#f4d03f', label: 'G3a' },
-    { min: 60, max: 90, color: '#52be80', label: 'G2' },
-    { min: 90, max: maxFGe + 20, color: '#27ae60', label: 'G1' },
-  ];
-
-  let svgZonas = zonas.map(z => {
-    const yTop = yS(Math.min(z.max, maxFGe + 10));
-    const yBot = yS(Math.max(z.min, minFGe));
-    if (yBot <= PAD.top || yTop >= PAD.top + iH) return '';
-    return `<rect x="${PAD.left}" y="${Math.max(PAD.top, yTop)}" width="${iW}" height="${Math.min(PAD.top+iH, yBot) - Math.max(PAD.top, yTop)}" fill="${z.color}" opacity="0.08"/>`;
-  }).join('');
-
-  // Líneas de referencia KDIGO
-  const refLines = [15, 30, 45, 60, 90].map(v => {
-    if (v < minFGe || v > maxFGe) return '';
-    const y = yS(v);
-    return `<line x1="${PAD.left}" y1="${y}" x2="${PAD.left+iW}" y2="${y}" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
-            <text x="${PAD.left - 4}" y="${y+4}" font-size="8" fill="#aaa" text-anchor="end">${v}</text>`;
-  }).join('');
-
-  // Eje X fechas
-  const xLabels = datos.map((d, i) => {
-    const x = xS(d.fecha.getTime());
-    const lbl = d.fecha.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
-    return `<text x="${x}" y="${H - 6}" font-size="8" fill="#999" text-anchor="middle">${lbl}</text>`;
-  }).join('');
-
-  // Línea principal
-  const pts = datos.map(d => `${xS(d.fecha.getTime()).toFixed(1)},${yS(d.fge).toFixed(1)}`).join(' ');
-  const polyline = `<polyline points="${pts}" fill="none" stroke="#2980b9" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-
-  // Área bajo la curva
-  const firstX = xS(datos[0].fecha.getTime()).toFixed(1);
-  const lastX  = xS(datos[datos.length-1].fecha.getTime()).toFixed(1);
-  const yBase  = (PAD.top + iH).toFixed(1);
-  const areaPath = `M${firstX},${yBase} L${pts.split(' ').map(p=>p).join(' L')} L${lastX},${yBase} Z`;
-
-  // Tendencia lineal (regresión simple)
-  let tendenciaHTML = '';
-  if (datos.length >= 3) {
-    const xs = datos.map(d => (d.fecha.getTime() - minF) / (maxF - minF));
-    const ys = datos.map(d => d.fge);
-    const n  = xs.length;
-    const sx = xs.reduce((a,b)=>a+b,0);
-    const sy = ys.reduce((a,b)=>a+b,0);
-    const sxy = xs.reduce((a,_,i) => a + xs[i]*ys[i], 0);
-    const sx2 = xs.reduce((a,_,i) => a + xs[i]*xs[i], 0);
-    const m   = (n*sxy - sx*sy) / (n*sx2 - sx*sx);
-    const b_  = (sy - m*sx) / n;
-    const y0  = yS(b_).toFixed(1);
-    const y1  = yS(m + b_).toFixed(1);
-    tendenciaHTML = `<line x1="${PAD.left}" y1="${y0}" x2="${PAD.left+iW}" y2="${y1}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7"/>`;
-  }
-
-  // Puntos
-  const circles = datos.map((d, i) => {
-    const cx = xS(d.fecha.getTime()).toFixed(1);
-    const cy = yS(d.fge).toFixed(1);
-    return `<circle cx="${cx}" cy="${cy}" r="4" fill="white" stroke="#2980b9" stroke-width="2"/>
-            <text x="${cx}" y="${parseFloat(cy)-8}" font-size="8.5" fill="#2980b9" text-anchor="middle" font-weight="600">${d.fge.toFixed(0)}</text>`;
-  }).join('');
-
-  return `
-    <div class="seg-chart-container">
-      <div class="seg-chart-title">📊 Curva de FGe (mL/min/1.73m²) — Estadios KDIGO</div>
-      <div class="seg-svg-wrap">
-        <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;display:block;">
-          ${svgZonas}
-          ${refLines}
-          <path d="${areaPath}" fill="#2980b9" opacity="0.06"/>
-          ${tendenciaHTML}
-          ${polyline}
-          ${circles}
-          ${xLabels}
-          <text x="${PAD.left - 30}" y="${PAD.top + iH/2}" font-size="8" fill="#999" transform="rotate(-90,${PAD.left-30},${PAD.top+iH/2})">FGe</text>
-        </svg>
-      </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
-        <span style="font-size:0.68rem;color:#2980b9;font-weight:600;">— FGe real</span>
-        <span style="font-size:0.68rem;color:#e74c3c;font-weight:600;">- - tendencia</span>
-        <span style="font-size:0.68rem;color:var(--muted);">Zonas: G1(verde) G2(verde) G3a(amarillo) G3b(naranja) G4(rojo) G5(bordo)</span>
-      </div>
-    </div>`;
-}
-// ═══════════════════════════════════════════════════════════════
-// PANEL DE ANALYTICS
-// ═══════════════════════════════════════════════════════════════
-let _analyticsVisible = false;
-
-function toggleAnalytics() {
-  _analyticsVisible = !_analyticsVisible;
-  const sec = document.getElementById('analytics-section');
-  const btn = document.getElementById('btn-analytics');
-  sec.style.display = _analyticsVisible ? 'block' : 'none';
-  btn.textContent = _analyticsVisible ? '📊 Ocultar estadísticas' : '📊 Ver estadísticas';
-  if (_analyticsVisible) renderAnalytics();
-}
-
-async function renderAnalytics() {
-  const db = await cargarDB();
-  if (!db.length) {
-    document.getElementById('an-total').textContent = '0';
-    document.getElementById('an-alertas').innerHTML = '<div class="no-alerts">Sin registros aún.</div>';
-    return;
-  }
-
-  const n = db.length;
-
-  // ─── KPIs ───
-  const edades = db.map(r => parseFloat(r['Edad'])).filter(v => !isNaN(v));
-  const fges   = db.map(r => parseFloat(r['FGe CKD-EPI'])).filter(v => !isNaN(v) && v > 0);
-  const conERC = db.filter(r => r['ERC'] === 'Sí').length;
-
-  document.getElementById('an-total').textContent = n;
-  document.getElementById('an-edad').textContent  = edades.length ? (edades.reduce((a,b)=>a+b,0)/edades.length).toFixed(0) : '—';
-  document.getElementById('an-fge').textContent   = fges.length   ? (fges.reduce((a,b)=>a+b,0)/fges.length).toFixed(0)   : '—';
-  document.getElementById('an-erc-pct').textContent = n ? Math.round(conERC/n*100)+'%' : '—';
-
-  // ─── Distribución estadios ERC (por FGe) ───
-  const estadios = { G1:0, G2:0, G3a:0, G3b:0, G4:0, G5:0 };
-  fges.forEach(v => {
-    if (v >= 90) estadios.G1++;
-    else if (v >= 60) estadios.G2++;
-    else if (v >= 45) estadios.G3a++;
-    else if (v >= 30) estadios.G3b++;
-    else if (v >= 15) estadios.G4++;
-    else estadios.G5++;
+// ─── NAVIGATION ─────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen" + n).classList.add("active");
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById("dot" + i);
+    dot.classList.remove("active","done");
+    document.getElementById("lbl" + i).classList.remove("active");
+    if (i < n) dot.classList.add("done");
+    if (i === n) { dot.classList.add("active"); document.getElementById("lbl" + i).classList.add("active"); }
+    const line = document.getElementById("line" + i);
+    if (line) { i < n ? line.classList.add("done") : line.classList.remove("done"); }
   });
-  const clsMap = { G1:'bar-g1', G2:'bar-g2', G3a:'bar-g3a', G3b:'bar-g3b', G4:'bar-g4', G5:'bar-g5' };
-  const totalFge = fges.length || 1;
-  document.getElementById('an-erc-chart').innerHTML = Object.entries(estadios).map(([k,v]) => {
-    const pct = Math.round(v/totalFge*100);
-    const w = pct > 0 ? Math.max(pct, 4) : 0;
-    return `<div class="bar-row">
-      <div class="bar-label">${k}</div>
-      <div class="bar-track"><div class="bar-fill ${clsMap[k]}" style="width:${w}%"><span>${v > 0 ? v+'p' : ''}</span></div></div>
-      <div style="font-size:0.72rem;color:var(--muted);min-width:30px">${pct}%</div>
-    </div>`;
-  }).join('') + `<div style="font-size:0.68rem;color:var(--muted);margin-top:8px;">Base: ${fges.length} pacientes con FGe registrado</div>`;
-
-  // ─── Comorbilidades ───
-  const comorbFields = [
-    { key: 'HTA', label: 'HTA' },
-    { key: 'DBT', label: 'Diabetes' },
-    { key: 'E.Coronaria', label: 'Coronaria' },
-    { key: 'IC', label: 'IC' },
-    { key: 'Evento CV (IAM/ACV)', label: 'Evento CV' },
-    { key: 'Dislipemia', label: 'Dislipemia' },
-    { key: 'AKI Previo (Antec.)', label: 'AKI Previo' },
-    { key: 'Tabaquismo', label: 'Tabaquismo' },
-  ];
-  const comorbData = comorbFields.map(f => ({
-    label: f.label,
-    count: db.filter(r => r[f.key] === 'Sí').length
-  })).sort((a,b) => b.count - a.count);
-
-  document.getElementById('an-comorbilidades-chart').innerHTML = comorbData.map(({label, count}) => {
-    const pct = Math.round(count/n*100);
-    const w = pct > 0 ? Math.max(pct, 3) : 0;
-    return `<div class="bar-row">
-      <div class="bar-label" style="min-width:72px;font-size:0.7rem;">${label}</div>
-      <div class="bar-track"><div class="bar-fill bar-generic" style="width:${w}%"><span>${count > 0 ? pct+'%' : ''}</span></div></div>
-      <div style="font-size:0.72rem;color:var(--muted);min-width:30px">${count}p</div>
-    </div>`;
-  }).join('');
-
-  // ─── Medicación ───
-  const medFields = [
-    { key: 'IECA/ARAII', label: 'IECA/ARA II' },
-    { key: 'iSGLT2', label: 'iSGLT2' },
-    { key: 'BB', label: 'Betabloqueo' },
-    { key: 'MRA', label: 'MRA' },
-    { key: 'Estatinas', label: 'Estatinas' },
-    { key: 'Diuréticos', label: 'Diuréticos' },
-    { key: 'AAS/Antiagregantes', label: 'AAS/Antiagr.' },
-    { key: 'EPO', label: 'EPO' },
-  ];
-  const medData = medFields.map(f => ({
-    label: f.label,
-    count: db.filter(r => r[f.key] === 'Sí').length
-  })).sort((a,b) => b.count - a.count);
-
-  document.getElementById('an-med-chart').innerHTML = medData.map(({label, count}) => {
-    const pct = Math.round(count/n*100);
-    const w = pct > 0 ? Math.max(pct, 3) : 0;
-    return `<div class="bar-row">
-      <div class="bar-label" style="min-width:72px;font-size:0.7rem;">${label}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#27ae60"><span>${count > 0 ? pct+'%' : ''}</span></div></div>
-      <div style="font-size:0.72rem;color:var(--muted);min-width:30px">${count}p</div>
-    </div>`;
-  }).join('');
-
-  // ─── ALERTAS CLÍNICAS ───
-  const alertas = [];
-
-  // FGe < 15 (G5)
-  const g5 = db.filter(r => { const v = parseFloat(r['FGe CKD-EPI']); return !isNaN(v) && v < 15; });
-  if (g5.length) alertas.push({ tipo: 'critical', icon: '🔴', titulo: `${g5.length} paciente${g5.length>1?'s':''} con FGe &lt;15 (G5)`, desc: 'Evaluar inicio de terapia de reemplazo renal.' });
-
-  // FGe 15-29 (G4)
-  const g4 = db.filter(r => { const v = parseFloat(r['FGe CKD-EPI']); return !isNaN(v) && v >= 15 && v < 30; });
-  if (g4.length) alertas.push({ tipo: 'warning', icon: '🟠', titulo: `${g4.length} paciente${g4.length>1?'s':''} con FGe 15–29 (G4)`, desc: 'Seguimiento estrecho y preparación para TRR.' });
-
-  // K > 5.5
-  const hiperK = db.filter(r => { const v = parseFloat(r['K (mEq/L)']); return !isNaN(v) && v > 5.5; });
-  if (hiperK.length) alertas.push({ tipo: 'critical', icon: '⚡', titulo: `${hiperK.length} paciente${hiperK.length>1?'s':''} con K &gt;5.5 mEq/L`, desc: 'Hipercalemia — revisar urgente.' });
-
-  // HCO3 < 18
-  const acidosis = db.filter(r => { const v = parseFloat(r['HCO3 (mEq/L)']); return !isNaN(v) && v < 18; });
-  if (acidosis.length) alertas.push({ tipo: 'warning', icon: '🧪', titulo: `${acidosis.length} paciente${acidosis.length>1?'s':''} con HCO₃ &lt;18 mEq/L`, desc: 'Acidosis metabólica severa — considerar bicarbonato.' });
-
-  // HCO3 18-22
-  const acidLeve = db.filter(r => { const v = parseFloat(r['HCO3 (mEq/L)']); return !isNaN(v) && v >= 18 && v < 22; });
-  if (acidLeve.length) alertas.push({ tipo: 'warning', icon: '🧪', titulo: `${acidLeve.length} paciente${acidLeve.length>1?'s':''} con HCO₃ 18–22 mEq/L`, desc: 'Acidosis metabólica leve-moderada.' });
-
-  // ERC sin iSGLT2
-  const ercSiniSGLT2 = db.filter(r => r['ERC'] === 'Sí' && r['iSGLT2'] !== 'Sí');
-  if (ercSiniSGLT2.length) alertas.push({ tipo: 'info', icon: '💊', titulo: `${ercSiniSGLT2.length} paciente${ercSiniSGLT2.length>1?'s con ERC no reciben':' con ERC no recibe'} iSGLT2`, desc: 'Evaluar elegibilidad para terapia nefroprotectora.' });
-
-  // Hb < 10
-  const anemia = db.filter(r => { const v = parseFloat(r['Hb (g/dL)']); return !isNaN(v) && v < 10; });
-  if (anemia.length) alertas.push({ tipo: 'warning', icon: '🩸', titulo: `${anemia.length} paciente${anemia.length>1?'s':''} con Hb &lt;10 g/dL`, desc: 'Anemia severa — considerar EPO y/o hierro.' });
-
-  // DBT sin iSGLT2
-  const dbtSiniSGLT2 = db.filter(r => r['DBT'] === 'Sí' && r['iSGLT2'] !== 'Sí');
-  if (dbtSiniSGLT2.length) alertas.push({ tipo: 'info', icon: '🩺', titulo: `${dbtSiniSGLT2.length} diabético${dbtSiniSGLT2.length>1?'s':''} sin iSGLT2`, desc: 'Evaluar indicación de iSGLT2 en paciente diabético.' });
-
-  const alertHTML = alertas.length
-    ? alertas.map(a => `<div class="alert-item alert-${a.tipo}"><div class="alert-icon">${a.icon}</div><div class="alert-text"><strong>${a.titulo}</strong>${a.desc}</div></div>`).join('')
-    : '<div class="no-alerts">✅ Sin alertas críticas en la cohorte actual.</div>';
-
-  document.getElementById('an-alertas').innerHTML = alertHTML;
-  document.getElementById('an-footer').textContent = `Actualizado: ${new Date().toLocaleString('es-AR')} · Base: ${n} registro${n!==1?'s':''}`;
+  document.getElementById("nav1").style.display = n === 1 ? "flex" : "none";
+  document.getElementById("nav2").style.display = n === 2 ? "flex" : "none";
+  document.getElementById("nav3").style.display = n === 3 ? "flex" : "none";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-// ─── INIT ──────────────────────────────────────────────────────────────────
-(async () => {
-  document.getElementById('fecha').valueAsDate = new Date();
-  // Si ya hay token guardado en la sesión, intentar cargar directamente
-  if (getToken()) {
-    const r = await fetch(WORKER_URL + '?action=whoami', { headers: authHdr() }).catch(() => null);
-    if (r && r.status !== 401) {
-      const whoami = await r.json().catch(() => ({}));
-      _currentUser = getUser();
-      _currentRole = whoami.role || getRole() || 'registro';
-      sessionStorage.setItem('nefroRole', _currentRole);
-      // Al recargar la página el token persiste pero la clave AES no.
-      // Pedimos la contraseña solo para reconstruir la clave de cifrado.
-      const pass2 = prompt('Ingresá tu contraseña para descifrar los N° HC:');
-      if (pass2) _cryptoKey = await _deriveKey(pass2);
-      mostrarLogin(false);
-      aplicarRol(_currentRole);
-      _initSessionTimeout();
-      mostrarToast('Cargando registros desde Airtable...', '');
-      await renderTabla();
-      return;
-    }
-    sessionStorage.removeItem('nefroToken');
-    sessionStorage.removeItem('nefroUser');
-    sessionStorage.removeItem('nefroRole');
+
+function goToESAS() {
+  const dni = document.getElementById("dniInput").value.trim();
+  if (!dni || dni.length < 7) { showToast("Por favor ingrese su DNI"); return; }
+  state.dni = dni;
+  buildESAS();
+  goTo(2);
+  document.getElementById("progressFill").style.width = "33%";
+}
+
+function goToMMAS() {
+  const missing = esasItems.filter(item => state.esas[item.id] === undefined);
+  if (missing.length > 0) { showToast(`Complete todos los ítems (faltan ${missing.length})`); return; }
+  state.esasOtroNombre = document.getElementById("otroNombre")?.value.trim() || "";
+  buildMMAS();
+  goTo(3);
+  document.getElementById("progressFill").style.width = "66%";
+}
+
+// ─── SUBMIT ─────────────────────────────────────────────
+async function submitAll() {
+  const missingMmas = mmasItems.filter(item => state.mmas[item.id] === undefined);
+  if (missingMmas.length > 0) { showToast(`Complete todas las preguntas (faltan ${missingMmas.length})`); return; }
+  if (state.mmasFreq === null) { showToast("Indique la frecuencia de olvidos"); return; }
+
+  let mmasScore = 0;
+  mmasItems.forEach(item => {
+    mmasScore += item.id === "q5" ? (state.mmas[item.id] === "no" ? 1 : 0) : (state.mmas[item.id] === "si" ? 1 : 0);
+  });
+  mmasScore += (1 - state.mmasFreq);
+  const mmasTotal = parseFloat((8 - mmasScore).toFixed(2));
+
+  const now = new Date();
+  const fecha = now.toLocaleDateString("es-AR");
+  const hora  = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+
+  const fields = {
+    "DNI": state.dni, "Fecha": fecha, "Hora": hora,
+    "ESAS_Dolor": state.esas.dolor, "ESAS_Cansancio": state.esas.cansancio,
+    "ESAS_Somnolencia": state.esas.somnolencia, "ESAS_Nauseas": state.esas.nauseas,
+    "ESAS_Apetito": state.esas.apetito, "ESAS_Respiracion": state.esas.respiracion,
+    "ESAS_Animo": state.esas.animo, "ESAS_Ansiedad": state.esas.ansiedad,
+    "ESAS_Sueno": state.esas.sueno, "ESAS_Bienestar": state.esas.bienestar,
+    "ESAS_Otro_Nombre": state.esasOtroNombre, "ESAS_Otro_Valor": state.esas.otro,
+    "MMAS_Q1": state.mmas.q1, "MMAS_Q2": state.mmas.q2, "MMAS_Q3": state.mmas.q3,
+    "MMAS_Q4": state.mmas.q4, "MMAS_Q5": state.mmas.q5, "MMAS_Q6": state.mmas.q6,
+    "MMAS_Q7": state.mmas.q7, "MMAS_Frecuencia": state.mmasFreq, "MMAS_Score": mmasTotal,
+  };
+
+  lastSubmittedFields = { fields, fecha, hora, mmasTotal };
+  addToQueue(fields);
+
+  document.getElementById("loadingOverlay").classList.add("show");
+  document.getElementById("loadingText").textContent = "Enviando datos…";
+
+  let enviado = false;
+  try {
+    await submitToWorker(fields);
+    const q = getQueue();
+    saveQueue(q.filter(item => !(item.payload.DNI === fields.DNI && item.payload.Fecha === fields.Fecha && item.payload.Hora === fields.Hora)));
+    enviado = true;
+  } catch(e) {
+    console.warn("Error al enviar:", e.message);
   }
-  mostrarLogin(true);
-})();
-</script></body></html>
+
+  document.getElementById("loadingOverlay").classList.remove("show");
+  document.getElementById("progressFill").style.width = "100%";
+
+  ["nav1","nav2","nav3"].forEach(id => document.getElementById(id).style.display = "none");
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen4").classList.add("active");
+  document.querySelector(".steps-bar").style.display = "none";
+  document.querySelector(".steps-labels").style.display = "none";
+
+  if (!enviado) {
+    document.getElementById("successOffline").classList.add("show");
+    document.getElementById("successIcon").textContent = "💾";
+    document.getElementById("successTitle").textContent = "Respuestas guardadas";
+  }
+
+  const pdfSection  = document.getElementById("pdfSection");
+  const emailStatus = document.getElementById("emailStatus");
+  const btnPdf      = document.getElementById("btnPdf");
+  pdfSection.style.display = "block";
+
+  try {
+    await sendEmailReport(fields, fecha, hora, mmasTotal);
+    emailStatus.textContent = "✅ Resumen enviado al equipo médico.";
+    emailStatus.style.color = "#2e9e6e";
+  } catch(err) {
+    emailStatus.textContent = "⚠️ No se pudo enviar el email automáticamente.";
+    emailStatus.style.color = "#e65100";
+  }
+  btnPdf.style.display = "block";
+  updatePendingBanner();
+}
+
+// ─── EMAILJS ────────────────────────────────────────────
+(function() { try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) {} })();
+
+async function sendEmailReport(fields, fecha, hora, mmasTotal) {
+  const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
+  const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
+  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"]];
+  const mmasLabels = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
+  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
+  const mmasRows = mmasLabels.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
+  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+    <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0"><h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1><p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">${fecha} · ${hora}</p></div>
+    <div style="padding:16px 24px;background:#f5f5f5"><span style="font-size:13px;color:#666">DNI: </span><strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong></div>
+    <div style="padding:20px 24px"><h2 style="color:#1a5c4a;font-size:15px">ESAS-r</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Valor</th></tr></thead><tbody>${esasRows}</tbody></table>
+    <h2 style="color:#1a5c4a;font-size:15px;margin-top:20px">MMAS-8</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
+    <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:20px"><div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div><div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div></div></div>`;
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: EMAIL_DESTINO, subject: `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`, message_html: htmlBody, dni: fields.DNI, fecha, hora, score_mmas: mmasTotal, nivel_mmas: scoreLabel });
+}
+
+// ─── PDF ────────────────────────────────────────────────
+function downloadSummary() {
+  if (!lastSubmittedFields) { showToast("No hay datos para exportar"); return; }
+  const { fields, fecha, hora, mmasTotal } = lastSubmittedFields;
+  const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
+  const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
+  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"],["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"] || "Otro síntoma"]];
+  const mmasKeysMap = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
+  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td>${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
+  const mmasRows = mmasKeysMap.map(([k,lbl]) => `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CERCA ${fields.DNI}</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}h1{color:#1a5c4a;font-size:22px}h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}td{padding:7px 12px;border-bottom:1px solid #eee}.score{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}.sn{font-size:36px;font-weight:bold;color:${scoreColor}}.sl{font-size:13px;color:${scoreColor};font-weight:600}</style></head><body>
+    <h1>Centro CERCA — Formulario de Evaluación</h1>
+    <p style="color:#888;font-size:13px">${fecha} · ${hora} · DNI: <strong style="color:#1a5c4a">${fields.DNI}</strong></p>
+    <h2>ESAS-r</h2><table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead><tbody>${esasRows}</tbody></table>
+    <h2>MMAS-8</h2><table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
+    <div class="score"><div class="sn">${mmasTotal}</div><div class="sl">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div>
+    </body></html>`;
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `CERCA_${fields.DNI}_${fecha.replace(/\//g,"-")}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast("✓ Resumen descargado");
+}
+
+// ─── UTILS ──────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function checkOnline() {
+  const banner = document.getElementById("offlineBanner");
+  if (!navigator.onLine) { banner.classList.add("show"); }
+  else { banner.classList.remove("show"); flushQueue(); }
+}
+window.addEventListener("online",  checkOnline);
+window.addEventListener("offline", checkOnline);
+window.addEventListener("load", () => { checkOnline(); updatePendingBanner(); if (navigator.onLine) flushQueue(); });
+</script>
+</body></html>
