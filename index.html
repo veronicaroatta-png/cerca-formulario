@@ -208,7 +208,7 @@
 // ═══════════════════════════════════════════════════════
 const WORKER_URL = "https://cerca.veronicaroatta.workers.dev";
 
-// ── EMAILJS (opcional — completar si querés email automático) ──
+// ── EMAILJS ──
 const EMAILJS_PUBLIC_KEY  = "JOu8hD_uLWcVWd00s";
 const EMAILJS_SERVICE_ID  = "service_6sf09b9";
 const EMAILJS_TEMPLATE_ID = "template_r6tjscb";
@@ -479,36 +479,160 @@ async function submitAll() {
 async function sendEmailReport(fields, fecha, hora, mmasTotal) {
   const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
   const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
-  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"]];
-  const mmasLabels = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
-  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
-  const mmasRows = mmasLabels.map(([k,lbl]) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
+
+  const esasKeys = [
+    ["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],
+    ["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],
+    ["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"]
+  ];
+
+  // Total ESAS: suma de los 10 síntomas principales (rango 0–100)
+  const esasTotal = esasKeys.reduce((sum, [k]) => sum + (fields[k] ?? 0), 0);
+  const esasTotalColor = esasTotal <= 20 ? "#2e9e6e" : esasTotal <= 50 ? "#ff9800" : "#e53935";
+  const esasTotalLabel = esasTotal <= 20 ? "Carga sintomática baja"
+                       : esasTotal <= 50 ? "Carga sintomática moderada"
+                       : "Carga sintomática alta";
+
+  const mmasLabels = [
+    ["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],
+    ["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],
+    ["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],
+    ["MMAS_Q7","¿Se siente fastidiado?"]
+  ];
+
+  const esasRows = esasKeys.map(([k,lbl]) =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${lbl}</td>
+     <td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`
+  ).join("");
+
+  const mmasRows = mmasLabels.map(([k,lbl]) =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px">${lbl}</td>
+     <td style="padding:6px 10px;text-align:center;font-weight:700;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`
+  ).join("");
+
   const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-    <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0"><h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1><p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">${fecha} · ${hora}</p></div>
-    <div style="padding:16px 24px;background:#f5f5f5"><span style="font-size:13px;color:#666">DNI: </span><strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong></div>
-    <div style="padding:20px 24px"><h2 style="color:#1a5c4a;font-size:15px">ESAS-r</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Valor</th></tr></thead><tbody>${esasRows}</tbody></table>
-    <h2 style="color:#1a5c4a;font-size:15px;margin-top:20px">MMAS-8</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th><th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
-    <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:20px"><div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div><div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div></div></div>`;
-  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: EMAIL_DESTINO, subject: `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`, message_html: htmlBody, dni: fields.DNI, fecha, hora, score_mmas: mmasTotal, nivel_mmas: scoreLabel });
+    <div style="background:#1a5c4a;padding:24px;border-radius:8px 8px 0 0">
+      <h1 style="color:#fff;margin:0;font-size:20px">Centro CERCA — Formulario de Evaluación</h1>
+      <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px">${fecha} · ${hora}</p>
+    </div>
+    <div style="padding:16px 24px;background:#f5f5f5">
+      <span style="font-size:13px;color:#666">DNI: </span>
+      <strong style="font-size:18px;color:#1a5c4a">${fields.DNI}</strong>
+    </div>
+    <div style="padding:20px 24px">
+      <h2 style="color:#1a5c4a;font-size:15px">ESAS-r</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Síntoma</th>
+          <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Valor</th>
+        </tr></thead>
+        <tbody>${esasRows}</tbody>
+      </table>
+
+      <!-- Total ESAS -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total ESAS-r (0–100)</div>
+        <div style="font-size:40px;font-weight:bold;color:${esasTotalColor}">${esasTotal}</div>
+        <div style="font-size:13px;font-weight:700;color:${esasTotalColor}">${esasTotalLabel}</div>
+      </div>
+
+      <h2 style="color:#1a5c4a;font-size:15px;margin-top:24px">MMAS-8</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:left">Pregunta</th>
+          <th style="background:#1a5c4a;color:#fff;padding:8px 10px;text-align:center">Resp.</th>
+        </tr></thead>
+        <tbody>${mmasRows}</tbody>
+      </table>
+
+      <div style="background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:12px">
+        <div style="font-size:11px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Score MMAS-8 (0–8)</div>
+        <div style="font-size:40px;font-weight:bold;color:${scoreColor}">${mmasTotal}</div>
+        <div style="font-size:13px;font-weight:700;color:${scoreColor}">${scoreLabel}</div>
+      </div>
+    </div>
+  </div>`;
+
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email: EMAIL_DESTINO,
+    subject: `Formulario CERCA – DNI ${fields.DNI} – ${fecha}`,
+    message_html: htmlBody,
+    dni: fields.DNI, fecha, hora,
+    score_mmas: mmasTotal, nivel_mmas: scoreLabel,
+    score_esas: esasTotal, nivel_esas: esasTotalLabel
+  });
 }
 
-// ─── PDF ────────────────────────────────────────────────
+// ─── PDF / RESUMEN DESCARGABLE ───────────────────────────
 function downloadSummary() {
   if (!lastSubmittedFields) { showToast("No hay datos para exportar"); return; }
   const { fields, fecha, hora, mmasTotal } = lastSubmittedFields;
   const scoreColor = mmasTotal >= 6 ? "#2e9e6e" : mmasTotal >= 4 ? "#ff9800" : "#e53935";
   const scoreLabel = mmasTotal >= 6 ? "Alta adherencia" : mmasTotal >= 4 ? "Adherencia media" : "Baja adherencia";
-  const esasKeys = [["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"],["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"] || "Otro síntoma"]];
-  const mmasKeysMap = [["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],["MMAS_Q7","¿Se siente fastidiado?"]];
-  const esasRows = esasKeys.map(([k,lbl]) => `<tr><td>${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`).join("");
-  const mmasRows = mmasKeysMap.map(([k,lbl]) => `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`).join("");
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CERCA ${fields.DNI}</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}h1{color:#1a5c4a;font-size:22px}h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}td{padding:7px 12px;border-bottom:1px solid #eee}.score{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}.sn{font-size:36px;font-weight:bold;color:${scoreColor}}.sl{font-size:13px;color:${scoreColor};font-weight:600}</style></head><body>
+
+  const esasKeys = [
+    ["ESAS_Dolor","Dolor"],["ESAS_Cansancio","Cansancio"],["ESAS_Somnolencia","Somnolencia"],
+    ["ESAS_Nauseas","Náuseas"],["ESAS_Apetito","Apetito"],["ESAS_Respiracion","Respiración"],
+    ["ESAS_Animo","Ánimo"],["ESAS_Ansiedad","Ansiedad"],["ESAS_Sueno","Sueño"],["ESAS_Bienestar","Bienestar"],
+    ["ESAS_Otro_Valor", fields["ESAS_Otro_Nombre"] || "Otro síntoma"]
+  ];
+
+  // Total ESAS (solo los 10 síntomas principales, sin "otro")
+  const esasCoreKeys = ["ESAS_Dolor","ESAS_Cansancio","ESAS_Somnolencia","ESAS_Nauseas","ESAS_Apetito",
+                        "ESAS_Respiracion","ESAS_Animo","ESAS_Ansiedad","ESAS_Sueno","ESAS_Bienestar"];
+  const esasTotal = esasCoreKeys.reduce((sum, k) => sum + (fields[k] ?? 0), 0);
+  const esasTotalColor = esasTotal <= 20 ? "#2e9e6e" : esasTotal <= 50 ? "#ff9800" : "#e53935";
+  const esasTotalLabel = esasTotal <= 20 ? "Carga sintomática baja"
+                       : esasTotal <= 50 ? "Carga sintomática moderada"
+                       : "Carga sintomática alta";
+
+  const mmasKeysMap = [
+    ["MMAS_Q1","¿Se olvida de tomar?"],["MMAS_Q2","¿Algún día no tomó?"],
+    ["MMAS_Q3","¿Suspendió sin avisar?"],["MMAS_Q4","¿Se olvida al viajar?"],
+    ["MMAS_Q5","¿Tomó la última dosis?"],["MMAS_Q6","¿Deja cuando cree que está controlado?"],
+    ["MMAS_Q7","¿Se siente fastidiado?"]
+  ];
+
+  const esasRows = esasKeys.map(([k,lbl]) =>
+    `<tr><td>${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ?? "—"}</td></tr>`
+  ).join("");
+  const mmasRows = mmasKeysMap.map(([k,lbl]) =>
+    `<tr><td style="font-size:12px">${lbl}</td><td style="text-align:center;font-weight:600;color:#1a5c4a">${fields[k] ? fields[k].toUpperCase() : "—"}</td></tr>`
+  ).join("");
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CERCA ${fields.DNI}</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#222}
+    h1{color:#1a5c4a;font-size:22px}
+    h2{color:#1a5c4a;font-size:15px;border-bottom:2px solid #e8f5f0;padding-bottom:6px;margin-top:24px}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+    th{background:#1a5c4a;color:#fff;padding:8px 12px;text-align:left}
+    td{padding:7px 12px;border-bottom:1px solid #eee}
+    .score{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:16px}
+    .sn{font-size:36px;font-weight:bold;color:${scoreColor}}
+    .sl{font-size:13px;color:${scoreColor};font-weight:600}
+    .esas-total{background:#f5f5f5;border-radius:8px;padding:16px;text-align:center;margin-top:12px;margin-bottom:4px}
+    .esas-total-n{font-size:36px;font-weight:bold;color:${esasTotalColor}}
+    .esas-total-l{font-size:13px;color:${esasTotalColor};font-weight:600}
+  </style></head><body>
     <h1>Centro CERCA — Formulario de Evaluación</h1>
     <p style="color:#888;font-size:13px">${fecha} · ${hora} · DNI: <strong style="color:#1a5c4a">${fields.DNI}</strong></p>
-    <h2>ESAS-r</h2><table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead><tbody>${esasRows}</tbody></table>
-    <h2>MMAS-8</h2><table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
-    <div class="score"><div class="sn">${mmasTotal}</div><div class="sl">${scoreLabel}</div><div style="font-size:11px;color:#999;margin-top:4px">Score MMAS-8 (0–8)</div></div>
-    </body></html>`;
+    <h2>ESAS-r</h2>
+    <table><thead><tr><th>Síntoma</th><th style="width:80px;text-align:center">Valor (0–10)</th></tr></thead><tbody>${esasRows}</tbody></table>
+    <div class="esas-total">
+      <div style="font-size:11px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total ESAS-r (0–100)</div>
+      <div class="esas-total-n">${esasTotal}</div>
+      <div class="esas-total-l">${esasTotalLabel}</div>
+    </div>
+    <h2>MMAS-8</h2>
+    <table><thead><tr><th>Pregunta</th><th style="width:60px;text-align:center">Resp.</th></tr></thead><tbody>${mmasRows}</tbody></table>
+    <div class="score">
+      <div style="font-size:11px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Score MMAS-8 (0–8)</div>
+      <div class="sn">${mmasTotal}</div>
+      <div class="sl">${scoreLabel}</div>
+    </div>
+  </body></html>`;
+
   const blob = new Blob([html], { type: "text/html" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
